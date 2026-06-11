@@ -1,0 +1,8 @@
+original.html
+data-vn.json
+app-code.txt
+build.js
+data-en-*.json
+.claude/
+node_modules/
+.vercel

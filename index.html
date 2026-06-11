@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>English — 英語1000 学習アプリ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700;800&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1c1c1e; --sub: #6b6b70; --line: #e0e1e6; --paper: #f8f9fb; --red: #1f51c8;
+    --red-soft: #ecf1fd; --green: #2e7d4f; --green-soft: #e8f5ee;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { font-family: 'Noto Sans JP', sans-serif; background: var(--paper); color: var(--ink); padding-bottom: 90px; }
+  .enfont { font-family: 'Inter', sans-serif; }
+  button { font-family: inherit; cursor: pointer; }
+
+  header { padding: 20px 20px 0; max-width: 1120px; margin: 0 auto; }
+  header h1 { font-family: 'Inter', sans-serif; font-weight: 800; font-size: 26px; letter-spacing: -0.01em; cursor: pointer; }
+  header h1 span { color: var(--red); font-size: 17px; font-weight: 700; margin-left: 8px; font-family: 'Noto Sans JP', sans-serif; }
+  .voice-row { display: flex; align-items: center; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
+  .voice-status { font-size: 12px; color: var(--sub); }
+  .voice-status.ok::before { content: "● "; color: var(--green); }
+  .voice-status.ng::before { content: "● "; color: var(--red); }
+  .speed-toggle { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: #fff; }
+  .speed-toggle button { border: none; background: none; padding: 5px 14px; font-size: 12.5px; font-weight: 500; color: var(--sub); }
+  .speed-toggle button.on { background: var(--ink); color: #fff; }
+
+  .tabs { position: fixed; bottom: 0; left: 0; right: 0; display: flex; background: #fff; border-top: 1px solid var(--line); z-index: 50; padding-bottom: env(safe-area-inset-bottom); }
+  .tabs button { flex: 1; border: none; background: none; padding: 13px 0 11px; font-size: 13px; font-weight: 700; color: var(--sub); border-top: 3px solid transparent; margin-top: -1px; }
+  .tabs button.on { color: var(--red); border-top-color: var(--red); }
+
+  main { max-width: 1120px; margin: 0 auto; padding: 16px 20px 40px; }
+
+  /* ---- 一覧 ---- */
+  .search-row { position: sticky; top: 0; background: var(--paper); padding: 10px 0; z-index: 10; display: flex; gap: 8px; }
+  .search-row input { flex: 1; min-width: 0; padding: 12px 16px; font-size: 16px; border: 1.5px solid var(--line); border-radius: 10px; background: #fff; font-family: inherit; outline: none; }
+  .search-row input:focus { border-color: var(--red); }
+  .search-row button { border: none; background: var(--red); color: #fff; border-radius: 10px; padding: 0 22px; font-size: 14.5px; font-weight: 700; white-space: nowrap; }
+  .search-row button:active { opacity: .85; }
+  .chips { display: flex; gap: 8px; overflow-x: auto; padding: 4px 0 12px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  .chips::-webkit-scrollbar { display: none; }
+  .chips button { white-space: nowrap; border: 1px solid var(--line); background: #fff; border-radius: 999px; padding: 7px 14px; font-size: 13px; font-weight: 500; color: var(--ink); }
+  .chips button.on { background: var(--red); border-color: var(--red); color: #fff; }
+  .chips button .n { color: var(--sub); font-size: 11px; margin-left: 4px; }
+  .chips button.on .n { color: rgba(255,255,255,.75); }
+
+  .result-count { font-size: 13px; color: var(--sub); margin: 4px 0 14px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 12px; }
+  .sec-head { grid-column: 1 / -1; font-size: 18px; font-weight: 700; margin-top: 18px; display: flex; align-items: center; gap: 10px; }
+  .sec-head::before { content: ""; display: block; width: 12px; height: 12px; background: var(--red); }
+  .card { background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px 14px; position: relative; cursor: pointer; transition: border-color .12s; }
+  .card:active { border-color: var(--red); }
+  .card .en { font-family: 'Inter', sans-serif; font-weight: 700; font-size: 30px; line-height: 1.3; padding-right: 56px; }
+  .card .jp { margin-top: 6px; font-size: 16px; font-weight: 500; }
+  .card .note { margin-top: 3px; font-size: 12.5px; color: var(--sub); }
+  .card .spk { position: absolute; top: 12px; right: 44px; border: none; background: var(--red-soft); color: var(--red); width: 32px; height: 32px; border-radius: 50%; font-size: 15px; display: flex; align-items: center; justify-content: center; }
+  .card .fav { position: absolute; top: 12px; right: 8px; border: none; background: none; font-size: 19px; color: #d9d4cb; width: 32px; height: 32px; }
+  .card .fav.on { color: #e8a91d; }
+  .card.playing { border-color: var(--red); box-shadow: 0 0 0 2px var(--red-soft); }
+
+  /* ---- フラッシュカード ---- */
+  .fc-controls { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+  select { padding: 9px 12px; font-size: 14px; border: 1.5px solid var(--line); border-radius: 8px; background: #fff; font-family: inherit; max-width: 100%; }
+  .btn { border: 1px solid var(--line); background: #fff; border-radius: 8px; padding: 9px 16px; font-size: 13.5px; font-weight: 500; }
+  .btn.primary { background: var(--red); border-color: var(--red); color: #fff; }
+  .btn:disabled { opacity: .4; cursor: default; }
+  .fc-stage { max-width: 560px; margin: 0 auto; }
+  .fc-counter { text-align: center; font-size: 13px; color: var(--sub); margin-bottom: 10px; }
+  .fc-card { background: #fff; border: 1.5px solid var(--line); border-radius: 16px; min-height: 280px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 36px 28px; cursor: pointer; user-select: none; -webkit-user-select: none; }
+  .fc-card .big { font-family: 'Inter', sans-serif; font-weight: 700; font-size: 44px; line-height: 1.3; }
+  .fc-card .big.jpfront { font-family: 'Noto Sans JP', sans-serif; font-size: 32px; }
+  .fc-card .answer { margin-top: 20px; padding-top: 20px; border-top: 1px dashed var(--line); width: 100%; }
+  .fc-card .answer .a-main { font-size: 26px; font-weight: 700; }
+  .fc-card .answer .a-main.enfont { font-size: 38px; }
+  .fc-card .answer .a-note { margin-top: 6px; font-size: 13px; color: var(--sub); }
+  .fc-card .hint { margin-top: 22px; font-size: 12.5px; color: var(--sub); }
+  .fc-nav { display: flex; gap: 10px; margin-top: 16px; justify-content: center; }
+  .fc-nav .btn { padding: 12px 22px; font-size: 15px; }
+  .fc-empty { text-align: center; color: var(--sub); padding: 60px 0; font-size: 14px; }
+
+  /* ---- クイズ ---- */
+  .qz-stage { max-width: 560px; margin: 0 auto; }
+  .qz-progress { height: 6px; background: var(--line); border-radius: 3px; overflow: hidden; margin-bottom: 18px; }
+  .qz-progress div { height: 100%; background: var(--red); transition: width .25s; }
+  .qz-q { background: #fff; border: 1.5px solid var(--line); border-radius: 16px; padding: 32px 24px; text-align: center; margin-bottom: 16px; }
+  .qz-q .big { font-family: 'Inter', sans-serif; font-weight: 700; font-size: 40px; line-height: 1.3; }
+  .qz-q .spk-big { margin-top: 12px; border: none; background: var(--red-soft); color: var(--red); border-radius: 999px; padding: 8px 22px; font-size: 14px; font-weight: 700; }
+  .qz-opts { display: grid; gap: 10px; }
+  .qz-opts button { text-align: left; border: 1.5px solid var(--line); background: #fff; border-radius: 12px; padding: 15px 18px; font-size: 16px; font-weight: 500; }
+  .qz-opts button.correct { border-color: var(--green); background: var(--green-soft); color: var(--green); font-weight: 700; }
+  .qz-opts button.wrong { border-color: var(--red); background: var(--red-soft); color: var(--red); }
+  .qz-opts button:disabled { cursor: default; }
+  .qz-next { margin-top: 16px; text-align: center; }
+  .qz-result { text-align: center; padding: 30px 0 10px; }
+  .qz-result .score { font-size: 52px; font-weight: 800; font-family: 'Inter', sans-serif; }
+  .qz-result .score span { font-size: 22px; color: var(--sub); font-weight: 500; }
+  .qz-result p { color: var(--sub); margin: 8px 0 22px; font-size: 14px; }
+  .qz-review { max-width: 560px; margin: 26px auto 0; text-align: left; }
+  .qz-review h3 { font-size: 14px; color: var(--sub); margin-bottom: 10px; font-weight: 700; }
+  .qz-review .item { background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 12px 16px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .qz-review .item .w { font-family: 'Inter', sans-serif; font-weight: 700; font-size: 20px; }
+  .qz-review .item .m { font-size: 13.5px; color: var(--sub); text-align: right; }
+
+  .banner { background: #fff8e6; border: 1px solid #f0dca8; border-radius: 10px; padding: 12px 16px; font-size: 13px; line-height: 1.7; margin-bottom: 16px; color: #6b5618; }
+  #toTop { position: fixed; right: 16px; bottom: calc(72px + env(safe-area-inset-bottom)); width: 46px; height: 46px; border-radius: 50%; border: 1px solid var(--line); background: #fff; color: var(--ink); font-size: 19px; box-shadow: 0 2px 10px rgba(0,0,0,.12); z-index: 49; display: flex; align-items: center; justify-content: center; }
+  @media (max-width: 600px) {
+    .card .en { font-size: 26px; }
+    .fc-card .big { font-size: 36px; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>English<span>英語 基本単語1000</span></h1>
+  <div class="voice-row">
+    <span id="voiceStatus" class="voice-status">音声を確認中…</span>
+    <span class="speed-toggle">
+      <button id="spdNormal" class="on">標準</button>
+      <button id="spdSlow">ゆっくり</button>
+    </span>
+  </div>
+</header>
+
+<main>
+  <div id="voiceBanner" class="banner" style="display:none">
+    このブラウザに英語の音声が見つかりません。<b>Chrome</b> や <b>Safari</b> など最新のブラウザで開くと発音が再生できます。
+  </div>
+
+  <!-- 一覧 -->
+  <div id="view-list">
+    <div class="search-row">
+      <input id="searchBox" type="search" placeholder="キーワード（日本語・英語）" autocomplete="off" enterkeyhint="search">
+      <button id="searchBtn">🔍 検索</button>
+    </div>
+    <div class="chips" id="chips"></div>
+    <div class="result-count" id="resultCount"></div>
+    <div class="grid" id="grid"></div>
+  </div>
+
+  <!-- フラッシュカード -->
+  <div id="view-flash" style="display:none">
+    <div class="fc-controls">
+      <select id="fcCat"></select>
+      <select id="fcDir">
+        <option value="en">英語 → 日本語</option>
+        <option value="jp">日本語 → 英語</option>
+      </select>
+      <button class="btn" id="fcShuffle">🔀 シャッフル</button>
+      <label style="font-size:13px;color:var(--sub);display:flex;align-items:center;gap:5px">
+        <input type="checkbox" id="fcAuto" checked> 自動発音
+      </label>
+    </div>
+    <div class="fc-stage" id="fcStage"></div>
+  </div>
+
+  <!-- クイズ -->
+  <div id="view-quiz" style="display:none">
+    <div class="fc-controls">
+      <select id="qzCat"></select>
+      <button class="btn primary" id="qzStart">クイズ開始（10問）</button>
+    </div>
+    <div class="qz-stage" id="qzStage"></div>
+  </div>
+</main>
+
+<button id="toTop" title="トップに戻る" aria-label="トップに戻る">↑</button>
+
+<nav class="tabs">
+  <button data-view="list" class="on">📖 単語帳</button>
+  <button data-view="flash">🃏 フラッシュカード</button>
+  <button data-view="quiz">✏️ クイズ</button>
+</nav>
+
+<script>
+const DATA = [{"id":"sec1","title":"あいさつ・基本表現","words":[{"en":"hello","jp":"こんにちは"},{"en":"good morning","jp":"おはようございます"},{"en":"thank you","jp":"ありがとう"},{"en":"thank you very much","jp":"どうもありがとう"},{"en":"sorry","jp":"ごめんなさい"},{"en":"excuse me","jp":"すみません","note":"呼びかけ・軽い謝罪"},{"en":"no problem","jp":"大丈夫・問題ない"},{"en":"goodbye","jp":"さようなら"},{"en":"see you again","jp":"また会いましょう"},{"en":"you're welcome","jp":"どういたしまして"},{"en":"congratulations","jp":"おめでとう"},{"en":"good night","jp":"おやすみなさい"},{"en":"please","jp":"お願いします"},{"en":"yes","jp":"はい"},{"en":"yeah","jp":"はい・うん","note":"くだけた言い方"},{"en":"no","jp":"いいえ"},{"en":"OK","jp":"OK・了解"},{"en":"nice to meet you","jp":"お会いできてうれしいです"},{"en":"good luck","jp":"がんばって・幸運を"},{"en":"wait a moment","jp":"ちょっと待って"},{"en":"let's go","jp":"行こう"},{"en":"maybe","jp":"たぶん"},{"en":"certainly","jp":"もちろん・確実に"},{"en":"of course","jp":"もちろん"},{"en":"that's right","jp":"そのとおり"},{"en":"go ahead","jp":"どうぞ"},{"en":"I don't understand","jp":"わかりません"},{"en":"say it again","jp":"もう一度言ってください"}]},{"id":"sec2","title":"人称代名詞・指示詞","words":[{"en":"I","jp":"私","note":"常に大文字で書く"},{"en":"you","jp":"あなた・あなたたち"},{"en":"he","jp":"彼"},{"en":"she","jp":"彼女"},{"en":"it","jp":"それ","note":"物・動物・天気などを指す"},{"en":"we","jp":"私たち"},{"en":"they","jp":"彼ら・彼女ら・それら"},{"en":"everyone","jp":"みなさん・全員"},{"en":"someone","jp":"誰か"},{"en":"something","jp":"何か"},{"en":"this","jp":"これ・この"},{"en":"that","jp":"あれ・それ・あの"},{"en":"these","jp":"これら"},{"en":"those","jp":"あれら・それら"},{"en":"here","jp":"ここ"},{"en":"there","jp":"そこ・あそこ"},{"en":"over there","jp":"あそこ・向こう"},{"en":"mine","jp":"私のもの"},{"en":"yours","jp":"あなたのもの"},{"en":"people","jp":"人々"}]},{"id":"sec3","title":"疑問詞","words":[{"en":"what","jp":"何"},{"en":"who","jp":"誰"},{"en":"where","jp":"どこ"},{"en":"which","jp":"どれ・どの"},{"en":"when","jp":"いつ"},{"en":"why","jp":"なぜ"},{"en":"how","jp":"どのように・どう"},{"en":"how much","jp":"いくら","note":"値段・数えられない量"},{"en":"how many","jp":"いくつ","note":"数えられる物の数"},{"en":"how long","jp":"どのくらいの期間"},{"en":"how far","jp":"どのくらいの距離"},{"en":"whose","jp":"誰の"},{"en":"how old","jp":"何歳"}]},{"id":"sec4","title":"数字・数え方","words":[{"en":"one","jp":"1"},{"en":"two","jp":"2"},{"en":"three","jp":"3"},{"en":"four","jp":"4"},{"en":"five","jp":"5"},{"en":"six","jp":"6"},{"en":"seven","jp":"7"},{"en":"eight","jp":"8"},{"en":"nine","jp":"9"},{"en":"ten","jp":"10"},{"en":"eleven","jp":"11"},{"en":"twelve","jp":"12"},{"en":"fifteen","jp":"15"},{"en":"twenty","jp":"20"},{"en":"twenty-one","jp":"21"},{"en":"thirty","jp":"30"},{"en":"fifty","jp":"50"},{"en":"one hundred","jp":"100"},{"en":"one thousand","jp":"1,000"},{"en":"ten thousand","jp":"10,000","note":"英語では「10×1000」と表す"},{"en":"one hundred thousand","jp":"100,000"},{"en":"one million","jp":"100万"},{"en":"one billion","jp":"10億"},{"en":"number","jp":"数・番号"},{"en":"time(s)","jp":"回","note":"three times＝3回"},{"en":"half","jp":"半分"},{"en":"first","jp":"第1の・1番目"}]},{"id":"sec5","title":"時間","words":[{"en":"time","jp":"時間"},{"en":"hour","jp":"時間（単位）","note":"60分のこと"},{"en":"minute","jp":"分"},{"en":"second","jp":"秒","note":"「第2の」の意味もある"},{"en":"day","jp":"日"},{"en":"week","jp":"週"},{"en":"month","jp":"月"},{"en":"year","jp":"年"},{"en":"today","jp":"今日"},{"en":"tomorrow","jp":"明日"},{"en":"yesterday","jp":"昨日"},{"en":"the day before yesterday","jp":"一昨日"},{"en":"the day after tomorrow","jp":"明後日"},{"en":"morning","jp":"朝・午前"},{"en":"noon","jp":"昼・正午"},{"en":"afternoon","jp":"午後"},{"en":"evening","jp":"夕方・晩"},{"en":"night","jp":"夜"},{"en":"now","jp":"今"},{"en":"o'clock","jp":"〜時","note":"ちょうどの時刻に使う"},{"en":"last week","jp":"先週"},{"en":"this week","jp":"今週"},{"en":"next week","jp":"来週"},{"en":"last month","jp":"先月"},{"en":"next month","jp":"来月"},{"en":"last year","jp":"去年"},{"en":"this year","jp":"今年"},{"en":"next year","jp":"来年"},{"en":"weekend","jp":"週末"},{"en":"holiday","jp":"祝日・休日"},{"en":"birthday","jp":"誕生日"},{"en":"New Year's Day","jp":"元日・正月"},{"en":"past","jp":"過去"},{"en":"future","jp":"未来"},{"en":"early","jp":"早い・早く"},{"en":"late","jp":"遅い・遅れた"}]},{"id":"sec6","title":"曜日・月","words":[{"en":"Monday","jp":"月曜日"},{"en":"Tuesday","jp":"火曜日"},{"en":"Wednesday","jp":"水曜日"},{"en":"Thursday","jp":"木曜日"},{"en":"Friday","jp":"金曜日"},{"en":"Saturday","jp":"土曜日"},{"en":"Sunday","jp":"日曜日"},{"en":"January","jp":"1月"},{"en":"February","jp":"2月"},{"en":"March","jp":"3月"},{"en":"April","jp":"4月"},{"en":"May","jp":"5月"},{"en":"June","jp":"6月"},{"en":"July","jp":"7月"},{"en":"August","jp":"8月"},{"en":"September","jp":"9月"},{"en":"October","jp":"10月"},{"en":"November","jp":"11月"},{"en":"December","jp":"12月"}]},{"id":"sec7","title":"家族","words":[{"en":"family","jp":"家族"},{"en":"father","jp":"父"},{"en":"mother","jp":"母"},{"en":"parents","jp":"両親"},{"en":"child","jp":"子ども"},{"en":"son","jp":"息子"},{"en":"daughter","jp":"娘"},{"en":"older brother","jp":"兄"},{"en":"older sister","jp":"姉"},{"en":"younger brother","jp":"弟"},{"en":"younger sister","jp":"妹"},{"en":"grandfather","jp":"祖父"},{"en":"grandmother","jp":"祖母"},{"en":"grandchild","jp":"孫"},{"en":"husband","jp":"夫"},{"en":"wife","jp":"妻"},{"en":"uncle","jp":"おじ"},{"en":"aunt","jp":"おば"},{"en":"relatives","jp":"親戚"},{"en":"siblings","jp":"兄弟姉妹"}]},{"id":"sec8","title":"体","words":[{"en":"body","jp":"体"},{"en":"head","jp":"頭"},{"en":"hair","jp":"髪"},{"en":"face","jp":"顔"},{"en":"eye","jp":"目"},{"en":"nose","jp":"鼻"},{"en":"mouth","jp":"口"},{"en":"ear","jp":"耳"},{"en":"tooth","jp":"歯","note":"複数形はteeth"},{"en":"tongue","jp":"舌"},{"en":"neck","jp":"首"},{"en":"shoulder","jp":"肩"},{"en":"hand","jp":"手"},{"en":"finger","jp":"指"},{"en":"leg","jp":"足・脚"},{"en":"stomach","jp":"おなか・胃"},{"en":"back","jp":"背中"},{"en":"chest","jp":"胸"},{"en":"heart","jp":"心臓・心"},{"en":"skin","jp":"皮膚・肌"},{"en":"blood","jp":"血"},{"en":"bone","jp":"骨"},{"en":"brain","jp":"脳"},{"en":"voice","jp":"声"}]},{"id":"sec9","title":"食べ物・料理","words":[{"en":"food","jp":"食べ物・料理"},{"en":"rice","jp":"ご飯・米"},{"en":"bread","jp":"パン"},{"en":"noodles","jp":"麺"},{"en":"sandwich","jp":"サンドイッチ"},{"en":"pizza","jp":"ピザ"},{"en":"hamburger","jp":"ハンバーガー"},{"en":"meat","jp":"肉"},{"en":"beef","jp":"牛肉"},{"en":"chicken","jp":"鶏肉・鶏"},{"en":"pork","jp":"豚肉"},{"en":"fish","jp":"魚"},{"en":"shrimp","jp":"エビ"},{"en":"crab","jp":"カニ"},{"en":"squid","jp":"イカ"},{"en":"egg","jp":"卵"},{"en":"vegetables","jp":"野菜"},{"en":"tofu","jp":"豆腐"},{"en":"salt","jp":"塩"},{"en":"sugar","jp":"砂糖"},{"en":"soy sauce","jp":"しょうゆ"},{"en":"chili","jp":"唐辛子"},{"en":"garlic","jp":"にんにく"},{"en":"onion","jp":"玉ねぎ"},{"en":"ginger","jp":"しょうが"},{"en":"cooking oil","jp":"食用油"},{"en":"butter","jp":"バター"},{"en":"cheese","jp":"チーズ"},{"en":"salad","jp":"サラダ"},{"en":"dessert","jp":"デザート"},{"en":"cake","jp":"ケーキ"},{"en":"candy","jp":"あめ・キャンディー"},{"en":"ice cream","jp":"アイスクリーム"},{"en":"soup","jp":"スープ"},{"en":"fried rice","jp":"チャーハン"},{"en":"steak","jp":"ステーキ"},{"en":"breakfast","jp":"朝食"},{"en":"lunch","jp":"昼食"},{"en":"dinner","jp":"夕食"},{"en":"chopsticks","jp":"箸"},{"en":"bowl","jp":"茶碗・椀"},{"en":"plate","jp":"皿"},{"en":"spoon","jp":"スプーン"}]},{"id":"sec10","title":"飲み物","words":[{"en":"drink","jp":"飲み物","note":"「飲む」の意味もある"},{"en":"water","jp":"水"},{"en":"tea","jp":"お茶・紅茶"},{"en":"green tea","jp":"緑茶"},{"en":"coffee","jp":"コーヒー"},{"en":"iced coffee","jp":"アイスコーヒー"},{"en":"milk","jp":"牛乳"},{"en":"orange juice","jp":"オレンジジュース"},{"en":"smoothie","jp":"スムージー"},{"en":"soda","jp":"炭酸飲料"},{"en":"beer","jp":"ビール"},{"en":"wine","jp":"ワイン"},{"en":"alcohol","jp":"酒・アルコール"},{"en":"ice","jp":"氷"}]},{"id":"sec11","title":"果物","words":[{"en":"fruit","jp":"果物"},{"en":"banana","jp":"バナナ"},{"en":"mango","jp":"マンゴー"},{"en":"orange","jp":"オレンジ","note":"「オレンジ色」の意味もある"},{"en":"apple","jp":"りんご"},{"en":"grape","jp":"ぶどう"},{"en":"watermelon","jp":"すいか"},{"en":"pineapple","jp":"パイナップル"},{"en":"papaya","jp":"パパイヤ"},{"en":"peach","jp":"桃"},{"en":"pear","jp":"梨"},{"en":"cherry","jp":"さくらんぼ"},{"en":"melon","jp":"メロン"},{"en":"kiwi","jp":"キウイ"},{"en":"lychee","jp":"ライチ"},{"en":"coconut","jp":"ココナッツ"},{"en":"lemon","jp":"レモン"},{"en":"grapefruit","jp":"グレープフルーツ"},{"en":"blueberry","jp":"ブルーベリー"},{"en":"plum","jp":"すもも・プラム"},{"en":"strawberry","jp":"いちご"}]},{"id":"sec12","title":"野菜","words":[{"en":"tomato","jp":"トマト"},{"en":"potato","jp":"じゃがいも"},{"en":"carrot","jp":"にんじん"},{"en":"cabbage","jp":"キャベツ"},{"en":"spinach","jp":"ほうれん草"},{"en":"cucumber","jp":"きゅうり"},{"en":"mushroom","jp":"きのこ"},{"en":"corn","jp":"とうもろこし"},{"en":"beans","jp":"豆"},{"en":"broccoli","jp":"ブロッコリー"},{"en":"lettuce","jp":"レタス"},{"en":"pumpkin","jp":"かぼちゃ"},{"en":"eggplant","jp":"なす"},{"en":"sweet potato","jp":"さつまいも"},{"en":"green pepper","jp":"ピーマン"}]},{"id":"sec13","title":"動物","words":[{"en":"animal","jp":"動物"},{"en":"dog","jp":"犬"},{"en":"cat","jp":"猫"},{"en":"chicken","jp":"鶏","note":"「鶏肉」の意味もある"},{"en":"duck","jp":"アヒル・カモ"},{"en":"pig","jp":"豚"},{"en":"cow","jp":"牛"},{"en":"lion","jp":"ライオン"},{"en":"wolf","jp":"おおかみ"},{"en":"bird","jp":"鳥"},{"en":"elephant","jp":"象"},{"en":"tiger","jp":"虎"},{"en":"monkey","jp":"猿"},{"en":"snake","jp":"蛇"},{"en":"mouse","jp":"ねずみ","note":"複数形はmice"},{"en":"goat","jp":"ヤギ"},{"en":"horse","jp":"馬"},{"en":"sheep","jp":"羊","note":"複数形もsheep"},{"en":"bear","jp":"熊"},{"en":"crocodile","jp":"ワニ"},{"en":"mosquito","jp":"蚊"},{"en":"bee","jp":"蜂"},{"en":"butterfly","jp":"蝶"},{"en":"rabbit","jp":"うさぎ"},{"en":"frog","jp":"カエル"}]},{"id":"sec14","title":"色","words":[{"en":"color","jp":"色"},{"en":"red","jp":"赤"},{"en":"blue","jp":"青"},{"en":"green","jp":"緑"},{"en":"yellow","jp":"黄色"},{"en":"white","jp":"白"},{"en":"black","jp":"黒"},{"en":"pink","jp":"ピンク"},{"en":"purple","jp":"紫"},{"en":"brown","jp":"茶色"},{"en":"gray","jp":"灰色","note":"英国つづりはgrey"},{"en":"orange","jp":"オレンジ色"}]},{"id":"sec15","title":"天気・自然","words":[{"en":"weather","jp":"天気"},{"en":"sky","jp":"空"},{"en":"rain","jp":"雨"},{"en":"sunny","jp":"晴れた"},{"en":"wind","jp":"風"},{"en":"cloud","jp":"雲"},{"en":"storm","jp":"嵐・台風"},{"en":"thunder","jp":"雷"},{"en":"snow","jp":"雪"},{"en":"sun","jp":"太陽"},{"en":"moon","jp":"月"},{"en":"star","jp":"星"},{"en":"sea","jp":"海"},{"en":"river","jp":"川"},{"en":"mountain","jp":"山"},{"en":"forest","jp":"森"},{"en":"lake","jp":"湖"},{"en":"island","jp":"島"},{"en":"tree","jp":"木"},{"en":"flower","jp":"花"},{"en":"leaf","jp":"葉","note":"複数形はleaves"},{"en":"ground","jp":"地面・土地"},{"en":"sand","jp":"砂"},{"en":"season","jp":"季節"},{"en":"spring","jp":"春"},{"en":"summer","jp":"夏"},{"en":"autumn","jp":"秋","note":"米語ではfall"},{"en":"winter","jp":"冬"},{"en":"rainy season","jp":"雨季・梅雨"},{"en":"dry season","jp":"乾季"}]},{"id":"sec16","title":"家・家具・家電","words":[{"en":"room","jp":"部屋"},{"en":"bedroom","jp":"寝室"},{"en":"living room","jp":"リビング"},{"en":"kitchen","jp":"台所"},{"en":"toilet","jp":"トイレ","note":"米語ではrestroom／bathroomが一般的"},{"en":"bathroom","jp":"浴室"},{"en":"door","jp":"ドア"},{"en":"window","jp":"窓"},{"en":"bed","jp":"ベッド"},{"en":"closet","jp":"戸棚・クローゼット"},{"en":"refrigerator","jp":"冷蔵庫","note":"口語ではfridge"},{"en":"fan","jp":"扇風機"},{"en":"air conditioner","jp":"エアコン"},{"en":"TV","jp":"テレビ"},{"en":"lamp","jp":"電灯・ランプ"},{"en":"mirror","jp":"鏡"},{"en":"key","jp":"鍵"},{"en":"elevator","jp":"エレベーター","note":"英国ではlift"},{"en":"stairs","jp":"階段"},{"en":"wall","jp":"壁"},{"en":"floor","jp":"床・階"},{"en":"roof","jp":"屋根"},{"en":"blanket","jp":"掛け布団・毛布"},{"en":"pillow","jp":"枕"},{"en":"washing machine","jp":"洗濯機"},{"en":"microwave","jp":"電子レンジ"},{"en":"trash","jp":"ごみ","note":"英国ではrubbish"}]},{"id":"sec17","title":"衣服・身につける物","words":[{"en":"clothes","jp":"服"},{"en":"shirt","jp":"シャツ"},{"en":"T-shirt","jp":"Tシャツ"},{"en":"jacket","jp":"上着・ジャケット"},{"en":"coat","jp":"コート"},{"en":"pants","jp":"ズボン","note":"英国ではtrousers"},{"en":"skirt","jp":"スカート"},{"en":"dress","jp":"ワンピース・ドレス"},{"en":"shoes","jp":"靴"},{"en":"sandals","jp":"サンダル"},{"en":"socks","jp":"靴下"},{"en":"hat","jp":"帽子"},{"en":"bag","jp":"かばん・袋"},{"en":"glasses","jp":"眼鏡"},{"en":"watch","jp":"腕時計","note":"「見る」の意味もある"},{"en":"suit","jp":"スーツ"},{"en":"belt","jp":"ベルト"},{"en":"ring","jp":"指輪"},{"en":"scarf","jp":"マフラー・スカーフ"},{"en":"umbrella","jp":"傘"}]},{"id":"sec18","title":"乗り物・交通","words":[{"en":"vehicle","jp":"乗り物・車両"},{"en":"motorbike","jp":"バイク"},{"en":"bicycle","jp":"自転車","note":"口語ではbike"},{"en":"car","jp":"自動車"},{"en":"bus","jp":"バス"},{"en":"train","jp":"列車・電車"},{"en":"subway","jp":"地下鉄","note":"英国ではunderground"},{"en":"airplane","jp":"飛行機","note":"planeと略せる"},{"en":"ship","jp":"船"},{"en":"taxi","jp":"タクシー"},{"en":"station","jp":"駅"},{"en":"airport","jp":"空港"},{"en":"bus stop","jp":"バス停"},{"en":"road","jp":"道・道路"},{"en":"street","jp":"通り・街路"},{"en":"bridge","jp":"橋"},{"en":"intersection","jp":"交差点"},{"en":"traffic light","jp":"信号"},{"en":"map","jp":"地図"},{"en":"ticket","jp":"切符・チケット"},{"en":"traffic","jp":"交通"},{"en":"traffic jam","jp":"渋滞"},{"en":"crosswalk","jp":"横断歩道"}]},{"id":"sec19","title":"場所・建物","words":[{"en":"market","jp":"市場"},{"en":"supermarket","jp":"スーパー"},{"en":"store","jp":"店","note":"英国ではshop"},{"en":"restaurant","jp":"レストラン"},{"en":"café","jp":"カフェ"},{"en":"convenience store","jp":"コンビニ"},{"en":"hospital","jp":"病院"},{"en":"pharmacy","jp":"薬局"},{"en":"bank","jp":"銀行"},{"en":"post office","jp":"郵便局"},{"en":"park","jp":"公園"},{"en":"library","jp":"図書館"},{"en":"museum","jp":"博物館・美術館"},{"en":"temple","jp":"寺"},{"en":"church","jp":"教会"},{"en":"hotel","jp":"ホテル"},{"en":"movie theater","jp":"映画館","note":"英国ではcinema"},{"en":"stadium","jp":"スタジアム"},{"en":"police station","jp":"警察署"},{"en":"university","jp":"大学"},{"en":"office","jp":"オフィス・事務所"},{"en":"factory","jp":"工場"},{"en":"swimming pool","jp":"プール"},{"en":"shopping mall","jp":"ショッピングモール"},{"en":"city","jp":"都市・市"},{"en":"countryside","jp":"田舎・農村"},{"en":"capital","jp":"首都"},{"en":"hometown","jp":"故郷"}]},{"id":"sec20","title":"職業","words":[{"en":"job","jp":"職業・仕事"},{"en":"teacher","jp":"教師"},{"en":"student","jp":"生徒・学生"},{"en":"university student","jp":"大学生"},{"en":"doctor","jp":"医者"},{"en":"nurse","jp":"看護師"},{"en":"engineer","jp":"エンジニア"},{"en":"farmer","jp":"農民"},{"en":"worker","jp":"労働者・工員"},{"en":"office worker","jp":"会社員"},{"en":"boss","jp":"上司・社長"},{"en":"lawyer","jp":"弁護士"},{"en":"police officer","jp":"警察官"},{"en":"chef","jp":"料理人・シェフ"},{"en":"driver","jp":"運転手"},{"en":"singer","jp":"歌手"},{"en":"actor","jp":"俳優"},{"en":"journalist","jp":"記者・ジャーナリスト"},{"en":"salesperson","jp":"販売員"},{"en":"tour guide","jp":"（観光）ガイド"},{"en":"interpreter","jp":"通訳"}]},{"id":"sec21","title":"学校・勉強","words":[{"en":"classroom","jp":"教室"},{"en":"lesson","jp":"課・レッスン"},{"en":"homework","jp":"宿題"},{"en":"word","jp":"単語"},{"en":"vocabulary","jp":"語彙"},{"en":"sentence","jp":"文"},{"en":"letter","jp":"文字","note":"「手紙」の意味もある"},{"en":"meaning","jp":"意味"},{"en":"question","jp":"質問"},{"en":"answer","jp":"答え","note":"「答える」の意味もある"},{"en":"exam","jp":"試験"},{"en":"score","jp":"点数"},{"en":"notebook","jp":"ノート"},{"en":"blackboard","jp":"黒板"},{"en":"dictionary","jp":"辞書"},{"en":"grammar","jp":"文法"},{"en":"pronunciation","jp":"発音"},{"en":"spelling","jp":"つづり・スペル"},{"en":"example","jp":"例"},{"en":"page","jp":"ページ"},{"en":"pencil","jp":"鉛筆"},{"en":"ruler","jp":"定規"},{"en":"eraser","jp":"消しゴム","note":"英国ではrubber"},{"en":"knowledge","jp":"知識"},{"en":"vacation","jp":"休暇・休み"}]},{"id":"sec22","title":"仕事・ビジネス","words":[{"en":"work","jp":"仕事","note":"「働く」の意味もある"},{"en":"meeting","jp":"会議"},{"en":"customer","jp":"顧客"},{"en":"contract","jp":"契約"},{"en":"salary","jp":"給料"},{"en":"report","jp":"報告・レポート"},{"en":"plan","jp":"計画"},{"en":"project","jp":"プロジェクト"},{"en":"market","jp":"市場（マーケット）"},{"en":"product","jp":"製品・商品"},{"en":"service","jp":"サービス"},{"en":"price","jp":"価格"},{"en":"sales","jp":"売上"},{"en":"profit","jp":"利益"},{"en":"tax","jp":"税金"},{"en":"export","jp":"輸出"},{"en":"import","jp":"輸入"},{"en":"advertising","jp":"広告"},{"en":"partner","jp":"パートナー・取引先"},{"en":"colleague","jp":"同僚"},{"en":"business","jp":"ビジネス・経営"},{"en":"company","jp":"会社"},{"en":"e-commerce","jp":"Eコマース・EC"},{"en":"business card","jp":"名刺"},{"en":"deadline","jp":"締め切り"}]},{"id":"sec23","title":"買い物・お金","words":[{"en":"shopping","jp":"買い物"},{"en":"money","jp":"お金"},{"en":"cash","jp":"現金"},{"en":"credit card","jp":"クレジットカード"},{"en":"discount","jp":"値引き・割引"},{"en":"free","jp":"無料","note":"「暇な・自由な」の意味もある"},{"en":"receipt","jp":"領収書・レシート"},{"en":"exchange money","jp":"両替する"},{"en":"dollar","jp":"ドル"},{"en":"yen","jp":"円"},{"en":"euro","jp":"ユーロ"},{"en":"pay","jp":"支払う"},{"en":"bargain","jp":"値切る・お買い得品"},{"en":"quality","jp":"品質"},{"en":"goods","jp":"商品・品物"},{"en":"brand","jp":"ブランド"},{"en":"too expensive","jp":"高すぎる"},{"en":"on sale","jp":"セール中"},{"en":"change","jp":"おつり","note":"「変わる・変える」の意味もある"},{"en":"plastic bag","jp":"ビニール袋"}]},{"id":"sec24","title":"動詞（基本）","words":[{"en":"be","jp":"〜である・いる","note":"am／is／areと変化する"},{"en":"have","jp":"持っている・ある"},{"en":"go","jp":"行く"},{"en":"come","jp":"来る"},{"en":"return","jp":"帰る・戻る"},{"en":"eat","jp":"食べる"},{"en":"drink","jp":"飲む"},{"en":"sleep","jp":"寝る"},{"en":"wake up","jp":"起きる"},{"en":"sit","jp":"座る"},{"en":"stand","jp":"立つ"},{"en":"run","jp":"走る"},{"en":"walk","jp":"歩く"},{"en":"fly","jp":"飛ぶ"},{"en":"swim","jp":"泳ぐ"},{"en":"speak","jp":"話す"},{"en":"listen","jp":"聞く"},{"en":"read","jp":"読む"},{"en":"write","jp":"書く"},{"en":"watch","jp":"見る","note":"テレビ・映画など動くものを見る"},{"en":"look","jp":"見る・目を向ける"},{"en":"see","jp":"見える・会う"},{"en":"study","jp":"勉強する"},{"en":"teach","jp":"教える"},{"en":"do","jp":"する"},{"en":"make","jp":"作る"},{"en":"buy","jp":"買う"},{"en":"sell","jp":"売る"},{"en":"give","jp":"あげる・与える"},{"en":"receive","jp":"受け取る"},{"en":"take","jp":"取る・持っていく"},{"en":"pass","jp":"渡す・合格する"},{"en":"send","jp":"送る"},{"en":"look for","jp":"探す"},{"en":"open","jp":"開ける"},{"en":"close","jp":"閉める"},{"en":"ask","jp":"尋ねる・頼む"},{"en":"answer","jp":"答える"},{"en":"help","jp":"手伝う・助ける"},{"en":"wait","jp":"待つ"},{"en":"begin","jp":"始める・始まる","note":"startも同じ意味"},{"en":"finish","jp":"終わる・終える"},{"en":"stop","jp":"止まる・止める"},{"en":"know","jp":"知っている"},{"en":"understand","jp":"理解する"},{"en":"remember","jp":"覚えている・思い出す"},{"en":"forget","jp":"忘れる"},{"en":"think","jp":"考える・思う"},{"en":"believe","jp":"信じる"},{"en":"need","jp":"必要とする"},{"en":"want","jp":"〜したい・欲しい"},{"en":"must","jp":"〜しなければならない","note":"have toも同じ意味"},{"en":"can","jp":"〜できる"},{"en":"like","jp":"好む・好きである"},{"en":"love","jp":"愛する・大好きである"},{"en":"hate","jp":"嫌う"},{"en":"meet","jp":"会う"},{"en":"laugh","jp":"笑う"},{"en":"cry","jp":"泣く"},{"en":"live","jp":"住む・生きる"},{"en":"die","jp":"死ぬ"}]},{"id":"sec25","title":"動詞（生活・行動）","words":[{"en":"cook","jp":"料理する"},{"en":"wash","jp":"洗う"},{"en":"wash the dishes","jp":"食器を洗う"},{"en":"do the laundry","jp":"洗濯する"},{"en":"clean","jp":"掃除する・片付ける"},{"en":"wipe","jp":"拭く"},{"en":"sweep","jp":"（床を）掃く"},{"en":"take a bath","jp":"入浴する","note":"シャワーはtake a shower"},{"en":"brush one's teeth","jp":"歯を磨く"},{"en":"put on","jp":"着る・身につける"},{"en":"take off","jp":"脱ぐ","note":"「離陸する」の意味もある"},{"en":"wear","jp":"着ている・身につけている"},{"en":"rest","jp":"休む"},{"en":"play","jp":"遊ぶ・（スポーツを）する・演奏する"},{"en":"sing","jp":"歌う"},{"en":"dance","jp":"踊る"},{"en":"draw","jp":"描く"},{"en":"take a photo","jp":"写真を撮る"},{"en":"travel","jp":"旅行する"},{"en":"drive","jp":"運転する"},{"en":"park","jp":"駐車する","note":"「公園」の意味もある"},{"en":"be born","jp":"生まれる"},{"en":"get married","jp":"結婚する"},{"en":"feel","jp":"感じる"},{"en":"become","jp":"〜になる"},{"en":"change","jp":"変わる・変える"},{"en":"use","jp":"使う"},{"en":"work","jp":"働く"},{"en":"practice","jp":"練習する"},{"en":"join","jp":"参加する"},{"en":"introduce","jp":"紹介する"},{"en":"explain","jp":"説明する"},{"en":"agree","jp":"同意する"},{"en":"refuse","jp":"断る"},{"en":"promise","jp":"約束する"},{"en":"call","jp":"電話をかける・呼ぶ"},{"en":"send a message","jp":"メッセージを送る"},{"en":"translate","jp":"翻訳する"},{"en":"prepare","jp":"準備する"},{"en":"decide","jp":"決める"},{"en":"choose","jp":"選ぶ"},{"en":"try","jp":"試す・努力する"},{"en":"borrow","jp":"借りる"},{"en":"give back","jp":"返す"},{"en":"lose","jp":"失う・なくす・負ける"},{"en":"win","jp":"勝つ"},{"en":"order","jp":"注文する"},{"en":"reserve","jp":"予約する","note":"bookも同じ意味"},{"en":"cancel","jp":"キャンセルする"},{"en":"check","jp":"チェックする・確認する"}]},{"id":"sec26","title":"形容詞（性質・状態）","words":[{"en":"beautiful","jp":"美しい・きれいな"},{"en":"good","jp":"良い"},{"en":"bad","jp":"悪い"},{"en":"big","jp":"大きい"},{"en":"small","jp":"小さい"},{"en":"tall","jp":"（背が）高い"},{"en":"high","jp":"高い"},{"en":"low","jp":"低い"},{"en":"long","jp":"長い"},{"en":"short","jp":"短い・（背が）低い"},{"en":"wide","jp":"広い"},{"en":"narrow","jp":"狭い"},{"en":"heavy","jp":"重い"},{"en":"light","jp":"軽い","note":"「明るい・光」の意味もある"},{"en":"thick","jp":"厚い"},{"en":"thin","jp":"薄い・やせた"},{"en":"fast","jp":"速い"},{"en":"slow","jp":"遅い"},{"en":"hot","jp":"暑い・熱い・辛い"},{"en":"cold","jp":"寒い・冷たい","note":"「風邪」の意味もある"},{"en":"cool","jp":"涼しい・かっこいい"},{"en":"warm","jp":"暖かい"},{"en":"new","jp":"新しい"},{"en":"old","jp":"古い・年取った"},{"en":"clean","jp":"清潔な","note":"「掃除する」の意味もある"},{"en":"dirty","jp":"汚い"},{"en":"bright","jp":"明るい"},{"en":"dark","jp":"暗い"},{"en":"strong","jp":"強い"},{"en":"weak","jp":"弱い"},{"en":"rich","jp":"裕福な"},{"en":"poor","jp":"貧しい"},{"en":"young","jp":"若い"},{"en":"fat","jp":"太った"},{"en":"right","jp":"正しい","note":"「右」の意味もある"},{"en":"wrong","jp":"間違った"},{"en":"true","jp":"本当の"},{"en":"same","jp":"同じ"},{"en":"different","jp":"違う・別の"},{"en":"far","jp":"遠い"},{"en":"near","jp":"近い"},{"en":"crowded","jp":"混んでいる"},{"en":"empty","jp":"空の・すいている"},{"en":"safe","jp":"安全な"},{"en":"dangerous","jp":"危険な"},{"en":"convenient","jp":"便利な"},{"en":"important","jp":"重要な"},{"en":"necessary","jp":"必要な"},{"en":"famous","jp":"有名な"},{"en":"special","jp":"特別な"},{"en":"difficult","jp":"難しい"},{"en":"easy","jp":"易しい・簡単な"},{"en":"expensive","jp":"（値段が）高い"},{"en":"cheap","jp":"（値段が）安い"},{"en":"deep","jp":"深い"}]},{"id":"sec27","title":"形容詞（味・感情・人柄）","words":[{"en":"delicious","jp":"おいしい"},{"en":"sweet","jp":"甘い"},{"en":"sour","jp":"酸っぱい"},{"en":"spicy","jp":"辛い"},{"en":"salty","jp":"塩辛い・しょっぱい"},{"en":"bitter","jp":"苦い"},{"en":"bland","jp":"味が薄い"},{"en":"fun","jp":"楽しい"},{"en":"sad","jp":"悲しい"},{"en":"angry","jp":"怒った"},{"en":"scared","jp":"怖い・おびえた"},{"en":"worried","jp":"心配な"},{"en":"happy","jp":"幸せな・うれしい"},{"en":"interesting","jp":"面白い・興味深い"},{"en":"boring","jp":"つまらない・退屈な"},{"en":"tired","jp":"疲れた"},{"en":"healthy","jp":"元気な・健康な"},{"en":"sick","jp":"病気の","note":"英国ではillが一般的"},{"en":"hungry","jp":"空腹の"},{"en":"full","jp":"満腹の・いっぱいの"},{"en":"thirsty","jp":"のどが渇いた"},{"en":"sleepy","jp":"眠い"},{"en":"smart","jp":"賢い"},{"en":"hardworking","jp":"勤勉な"},{"en":"lazy","jp":"怠惰な"},{"en":"polite","jp":"礼儀正しい"},{"en":"friendly","jp":"親しみやすい"},{"en":"kind","jp":"親切な","note":"「種類」の意味もある"},{"en":"cute","jp":"かわいい"},{"en":"quiet","jp":"静かな"},{"en":"noisy","jp":"うるさい"},{"en":"busy","jp":"忙しい"},{"en":"free","jp":"暇な・自由な"},{"en":"funny","jp":"ユーモアのある・おかしい"},{"en":"comfortable","jp":"快適な"}]},{"id":"sec28","title":"副詞・程度・頻度","words":[{"en":"very","jp":"とても"},{"en":"so","jp":"とても・そんなに"},{"en":"too","jp":"〜すぎる","note":"「〜も」の意味もある"},{"en":"a little","jp":"少し"},{"en":"slightly","jp":"やや・わずかに"},{"en":"also","jp":"〜も・また"},{"en":"still","jp":"まだ・依然として"},{"en":"already","jp":"もう・すでに"},{"en":"yet","jp":"まだ（〜ない）","note":"否定文・疑問文で使う"},{"en":"will","jp":"〜するだろう","note":"未来を表す"},{"en":"just","jp":"ちょうど・〜したばかり"},{"en":"always","jp":"いつも"},{"en":"usually","jp":"普段・たいてい"},{"en":"often","jp":"よく・しばしば"},{"en":"sometimes","jp":"時々"},{"en":"rarely","jp":"めったに〜ない"},{"en":"never","jp":"決して〜ない"},{"en":"soon","jp":"すぐに"},{"en":"before","jp":"前に"},{"en":"after","jp":"後で"},{"en":"together","jp":"一緒に"},{"en":"only","jp":"〜だけ"},{"en":"around","jp":"約・およそ","note":"「周りに」の意味もある"},{"en":"more","jp":"もっと・さらに"},{"en":"again","jp":"再び・また"},{"en":"almost","jp":"ほとんど"}]},{"id":"sec29","title":"接続詞・前置詞","words":[{"en":"and","jp":"〜と・そして"},{"en":"but","jp":"しかし"},{"en":"or","jp":"または"},{"en":"because","jp":"なぜなら・〜なので"},{"en":"so","jp":"だから"},{"en":"if","jp":"もし"},{"en":"when","jp":"〜のとき","note":"「いつ」の意味もある"},{"en":"to","jp":"〜するために・〜へ"},{"en":"of","jp":"〜の"},{"en":"with","jp":"〜と一緒に"},{"en":"for","jp":"〜のために・〜に"},{"en":"from","jp":"〜から"},{"en":"until","jp":"〜まで"},{"en":"in","jp":"〜の中に"},{"en":"on","jp":"〜の上に"},{"en":"under","jp":"〜の下に"},{"en":"outside","jp":"〜の外に"},{"en":"between","jp":"〜の間に"},{"en":"about","jp":"〜について"},{"en":"by","jp":"〜で（手段）・〜のそばに"},{"en":"according to","jp":"〜によると・〜に従って"}]},{"id":"sec30","title":"国・国籍・言語","words":[{"en":"Japan","jp":"日本"},{"en":"America","jp":"アメリカ","note":"the U.S.／the USAともいう"},{"en":"the UK","jp":"イギリス"},{"en":"South Korea","jp":"韓国"},{"en":"China","jp":"中国"},{"en":"France","jp":"フランス"},{"en":"Germany","jp":"ドイツ"},{"en":"Russia","jp":"ロシア"},{"en":"Australia","jp":"オーストラリア"},{"en":"India","jp":"インド"},{"en":"Thailand","jp":"タイ"},{"en":"Vietnam","jp":"ベトナム"},{"en":"Canada","jp":"カナダ"},{"en":"Brazil","jp":"ブラジル"},{"en":"Mexico","jp":"メキシコ"},{"en":"Indonesia","jp":"インドネシア"},{"en":"Malaysia","jp":"マレーシア"},{"en":"Singapore","jp":"シンガポール"},{"en":"the Philippines","jp":"フィリピン"},{"en":"Taiwan","jp":"台湾"},{"en":"Spain","jp":"スペイン"},{"en":"Italy","jp":"イタリア"},{"en":"English","jp":"英語"},{"en":"Japanese","jp":"日本語","note":"「日本人」の意味もある"},{"en":"Chinese","jp":"中国語"},{"en":"Korean","jp":"韓国語"},{"en":"Spanish","jp":"スペイン語"},{"en":"Japanese people","jp":"日本人"},{"en":"American people","jp":"アメリカ人"},{"en":"foreigner","jp":"外国人"},{"en":"world","jp":"世界"},{"en":"Asia","jp":"アジア"},{"en":"Europe","jp":"ヨーロッパ"},{"en":"international","jp":"国際的な"}]},{"id":"sec31","title":"旅行","words":[{"en":"trip","jp":"旅行","note":"travelも同じ意味"},{"en":"passport","jp":"パスポート"},{"en":"visa","jp":"ビザ"},{"en":"luggage","jp":"荷物"},{"en":"suitcase","jp":"スーツケース"},{"en":"book a room","jp":"部屋を予約する"},{"en":"check-in","jp":"チェックイン"},{"en":"check-out","jp":"チェックアウト"},{"en":"tourist","jp":"観光客"},{"en":"tourist spot","jp":"観光地・名所"},{"en":"flight","jp":"フライト・便"},{"en":"plane ticket","jp":"航空券"},{"en":"customs","jp":"税関","note":"「習慣」の意味もある"},{"en":"embassy","jp":"大使館"},{"en":"beach","jp":"ビーチ・浜辺"},{"en":"souvenir","jp":"お土産"},{"en":"guide","jp":"案内・ガイドする"},{"en":"schedule","jp":"スケジュール・日程"},{"en":"single room","jp":"シングルルーム"},{"en":"double room","jp":"ダブルルーム"}]},{"id":"sec32","title":"健康・病気","words":[{"en":"health","jp":"健康"},{"en":"illness","jp":"病気"},{"en":"medicine","jp":"薬"},{"en":"hurt","jp":"痛い・痛む"},{"en":"fever","jp":"熱・発熱"},{"en":"cough","jp":"咳"},{"en":"cold","jp":"風邪","note":"catch a cold＝風邪をひく"},{"en":"flu","jp":"インフルエンザ"},{"en":"headache","jp":"頭痛"},{"en":"stomachache","jp":"腹痛"},{"en":"toothache","jp":"歯痛"},{"en":"see a doctor","jp":"診察を受ける"},{"en":"injection","jp":"注射"},{"en":"allergy","jp":"アレルギー"},{"en":"fatigue","jp":"疲労・だるさ"},{"en":"sleep well","jp":"よく眠る"},{"en":"exercise","jp":"運動する・運動"},{"en":"lose weight","jp":"減量する・やせる"},{"en":"gain weight","jp":"体重が増える"},{"en":"insurance","jp":"保険"},{"en":"emergency","jp":"救急・緊急"},{"en":"injury","jp":"けが・傷"}]},{"id":"sec33","title":"趣味・スポーツ","words":[{"en":"hobby","jp":"趣味"},{"en":"sports","jp":"スポーツ"},{"en":"soccer","jp":"サッカー","note":"英国ではfootball"},{"en":"baseball","jp":"野球"},{"en":"basketball","jp":"バスケットボール"},{"en":"volleyball","jp":"バレーボール"},{"en":"table tennis","jp":"卓球"},{"en":"badminton","jp":"バドミントン"},{"en":"tennis","jp":"テニス"},{"en":"swimming","jp":"水泳"},{"en":"jogging","jp":"ジョギング"},{"en":"going to the gym","jp":"ジムで鍛えること"},{"en":"music","jp":"音楽"},{"en":"movie","jp":"映画","note":"英国ではfilm"},{"en":"reading","jp":"読書"},{"en":"fishing","jp":"釣り"},{"en":"chess","jp":"チェス"},{"en":"video game","jp":"テレビゲーム"},{"en":"guitar","jp":"ギター"},{"en":"photography","jp":"写真撮影"},{"en":"hiking","jp":"ハイキング・登山"},{"en":"yoga","jp":"ヨガ"},{"en":"dancing","jp":"ダンス"},{"en":"camping","jp":"キャンプ"},{"en":"team","jp":"チーム"},{"en":"player","jp":"選手"},{"en":"match","jp":"試合","note":"米語ではgameが一般的"}]},{"id":"sec34","title":"IT・スマホ","words":[{"en":"computer","jp":"パソコン・コンピュータ"},{"en":"smartphone","jp":"スマートフォン"},{"en":"network","jp":"ネットワーク"},{"en":"internet","jp":"インターネット"},{"en":"email","jp":"メール"},{"en":"message","jp":"メッセージ"},{"en":"social media","jp":"SNS","note":"英語でSNSとは言わない"},{"en":"app","jp":"アプリ"},{"en":"website","jp":"ウェブサイト"},{"en":"password","jp":"パスワード"},{"en":"download","jp":"ダウンロードする"},{"en":"Wi-Fi","jp":"Wi-Fi"},{"en":"camera","jp":"カメラ"},{"en":"screen","jp":"画面・モニター"},{"en":"keyboard","jp":"キーボード"},{"en":"data","jp":"データ"},{"en":"AI","jp":"人工知能・AI","note":"artificial intelligenceの略"},{"en":"charge","jp":"充電する","note":"「料金」の意味もある"}]},{"id":"sec35","title":"数量の表現（a piece of など）","words":[{"en":"a piece of","jp":"1切れの・1枚の","note":"a piece of paper＝紙1枚"},{"en":"a pair of","jp":"一対の・1組の","note":"a pair of shoes＝靴1足"},{"en":"a cup of","jp":"カップ1杯の","note":"a cup of coffee＝コーヒー1杯"},{"en":"a glass of","jp":"グラス1杯の","note":"a glass of water＝水1杯"},{"en":"a bottle of","jp":"瓶1本の"},{"en":"a box of","jp":"1箱の"},{"en":"a sheet of","jp":"（紙など）1枚の"},{"en":"a slice of","jp":"（薄い）1切れの","note":"a slice of bread＝パン1枚"},{"en":"a loaf of","jp":"（パン）1斤の"},{"en":"a bowl of","jp":"茶碗・ボウル1杯の"},{"en":"a bunch of","jp":"1房・1束の","note":"a bunch of bananas＝バナナ1房"},{"en":"a set of","jp":"1セットの・一式の"},{"en":"a kind of","jp":"一種の"},{"en":"a couple of","jp":"2〜3の"},{"en":"a lot of","jp":"たくさんの"},{"en":"a few","jp":"少しの","note":"数えられる物に使う"},{"en":"a little","jp":"少しの","note":"数えられない物に使う"},{"en":"a dozen","jp":"1ダース・12個の"}]},{"id":"sec36","title":"方向・位置","words":[{"en":"left side","jp":"左側"},{"en":"right side","jp":"右側"},{"en":"front","jp":"前方・前"},{"en":"back","jp":"後方・後ろ","note":"「背中」の意味もある"},{"en":"next to","jp":"〜のとなりに"},{"en":"across from","jp":"〜の向かい側に"},{"en":"inside","jp":"内側・中に"},{"en":"outside","jp":"外側・外に"},{"en":"in the middle","jp":"真ん中に"},{"en":"around","jp":"周りに"},{"en":"north","jp":"北"},{"en":"south","jp":"南"},{"en":"east","jp":"東"},{"en":"west","jp":"西"},{"en":"direction","jp":"方向"},{"en":"turn left","jp":"左に曲がる"},{"en":"turn right","jp":"右に曲がる"},{"en":"go straight","jp":"まっすぐ行く"},{"en":"turn back","jp":"引き返す・戻る"},{"en":"entrance","jp":"入口"},{"en":"exit","jp":"出口"},{"en":"address","jp":"住所"}]},{"id":"sec37","title":"日常の名詞いろいろ","words":[{"en":"newspaper","jp":"新聞"},{"en":"letter","jp":"手紙"},{"en":"photo","jp":"写真"},{"en":"event","jp":"出来事・イベント"},{"en":"news","jp":"ニュース"},{"en":"problem","jp":"問題"},{"en":"reason","jp":"理由"},{"en":"way","jp":"方法・やり方","note":"「道」の意味もある"},{"en":"thing","jp":"物・こと"},{"en":"matter","jp":"事柄・問題"},{"en":"present","jp":"プレゼント・贈り物","note":"giftも同じ意味"},{"en":"paper","jp":"紙"},{"en":"name","jp":"名前"},{"en":"age","jp":"年齢"},{"en":"dream","jp":"夢"},{"en":"life","jp":"生活・人生"},{"en":"habit","jp":"習慣"},{"en":"experience","jp":"経験"},{"en":"chance","jp":"チャンス・機会"},{"en":"result","jp":"結果"},{"en":"truth","jp":"事実・真実"},{"en":"opinion","jp":"意見"},{"en":"advice","jp":"アドバイス・助言"},{"en":"personality","jp":"性格"},{"en":"smile","jp":"笑顔・ほほえむ"},{"en":"noise","jp":"騒音"},{"en":"smell","jp":"におい"},{"en":"taste","jp":"味"},{"en":"sound","jp":"音"},{"en":"light","jp":"光"},{"en":"shadow","jp":"影"},{"en":"ball","jp":"ボール"},{"en":"fire","jp":"火"},{"en":"smoke","jp":"煙"},{"en":"air","jp":"空気"},{"en":"environment","jp":"環境"},{"en":"society","jp":"社会"},{"en":"culture","jp":"文化"},{"en":"history","jp":"歴史"},{"en":"tradition","jp":"伝統"},{"en":"law","jp":"法律"},{"en":"government","jp":"政府"},{"en":"peace","jp":"平和"},{"en":"war","jp":"戦争"},{"en":"love","jp":"愛・恋愛"},{"en":"friendship","jp":"友情"},{"en":"joy","jp":"喜び"},{"en":"sadness","jp":"悲しみ"},{"en":"difference","jp":"違い"},{"en":"wallet","jp":"財布"},{"en":"meal","jp":"食事"},{"en":"story","jp":"物語・話"},{"en":"song","jp":"歌"},{"en":"shower","jp":"にわか雨・シャワー"},{"en":"gift","jp":"贈り物・ギフト"}]}];
+const AUDIO_MAP = {};
+
+/* ===== 共通 ===== */
+const ALL_WORDS = [];
+DATA.forEach((sec, si) => sec.words.forEach((w, wi) => {
+  ALL_WORDS.push({ ...w, id: si + ':' + wi, secIdx: si, secTitle: sec.title });
+}));
+
+const favs = new Set(JSON.parse(localStorage.getItem('envocab_favs') || '[]'));
+const saveFavs = () => localStorage.setItem('envocab_favs', JSON.stringify([...favs]));
+
+const norm = s => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/đ/g, 'd');
+
+/* ===== 音声 ===== Web Speech API で英語（en-US）を読み上げる */
+let enVoice = null;
+let rate = 1.0;
+const hasMp3 = Object.keys(AUDIO_MAP).length > 0;
+const player = new Audio();
+function pickVoice() {
+  const vs = speechSynthesis.getVoices().filter(v => v.lang.replace('_', '-').toLowerCase().startsWith('en'));
+  if (!vs.length) return null;
+  return vs.find(v => v.lang.toLowerCase().startsWith('en-us') && /samantha|google/i.test(v.name)) || vs.find(v => v.lang.toLowerCase().startsWith('en-us')) || vs[0];
+}
+function updateVoiceStatus() {
+  enVoice = pickVoice();
+  const el = document.getElementById('voiceStatus');
+  if (hasMp3) {
+    el.textContent = '発音: MP3';
+    el.className = 'voice-status ok';
+    document.getElementById('voiceBanner').style.display = 'none';
+  } else if (enVoice) {
+    el.textContent = '発音: ' + enVoice.name;
+    el.className = 'voice-status ok';
+    document.getElementById('voiceBanner').style.display = 'none';
+  } else {
+    el.textContent = '英語音声なし';
+    el.className = 'voice-status ng';
+    document.getElementById('voiceBanner').style.display = 'block';
+  }
+}
+if ('speechSynthesis' in window) {
+  updateVoiceStatus();
+  speechSynthesis.onvoiceschanged = updateVoiceStatus;
+}
+function stopSpeak() {
+  if ('speechSynthesis' in window) speechSynthesis.cancel();
+  player.pause();
+}
+function speak(text, onend) {
+  stopSpeak();
+  const id = AUDIO_MAP[text];
+  if (id !== undefined) {
+    player.src = 'audio/' + id + '.mp3';
+    player.playbackRate = rate;
+    if ('preservesPitch' in player) player.preservesPitch = true;
+    player.onended = onend || null;
+    player.play().catch(() => speakTTS(text, onend));
+    return;
+  }
+  speakTTS(text, onend);
+}
+function speakTTS(text, onend) {
+  if (!('speechSynthesis' in window)) return;
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'en-US';
+  if (enVoice) u.voice = enVoice;
+  u.rate = rate;
+  if (onend) u.onend = onend;
+  speechSynthesis.speak(u);
+}
+document.getElementById('spdNormal').onclick = e => { rate = 1.0; e.target.classList.add('on'); document.getElementById('spdSlow').classList.remove('on'); };
+document.getElementById('spdSlow').onclick = e => { rate = 0.6; e.target.classList.add('on'); document.getElementById('spdNormal').classList.remove('on'); };
+
+/* ===== タブ切替 ===== */
+function showView(view) {
+  document.querySelectorAll('.tabs button').forEach(x => x.classList.toggle('on', x.dataset.view === view));
+  ['list', 'flash', 'quiz'].forEach(v => document.getElementById('view-' + v).style.display = (v === view) ? '' : 'none');
+  stopSpeak();
+  if (view === 'flash') renderFlash();
+}
+document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => showView(b.dataset.view));
+
+/* ===== 一覧 ===== */
+let currentCat = 'all';
+const chipsEl = document.getElementById('chips');
+function buildChips() {
+  const mk = (key, label, n) => {
+    const b = document.createElement('button');
+    b.innerHTML = label + (n != null ? `<span class="n">${n}</span>` : '');
+    b.dataset.cat = key;
+    b.onclick = () => { currentCat = key; [...chipsEl.children].forEach(x => x.classList.toggle('on', x === b)); renderList(); };
+    return b;
+  };
+  chipsEl.appendChild(mk('all', 'すべて', ALL_WORDS.length)).classList.add('on');
+  chipsEl.appendChild(mk('fav', '★ お気に入り', null));
+  DATA.forEach((sec, si) => chipsEl.appendChild(mk(String(si), sec.title, sec.words.length)));
+}
+function matchesSearch(w, q) {
+  if (!q) return true;
+  return norm(w.en).includes(q) || norm(w.jp).includes(q) || norm(w.note || '').includes(q) || norm(w.secTitle).includes(q);
+}
+function cardHTML(w) {
+  return `<div class="card" data-id="${w.id}">
+    <div class="en enfont">${w.en}</div>
+    <div class="jp">${w.jp}</div>
+    ${w.note ? `<div class="note">${w.note}</div>` : ''}
+    <button class="spk" title="発音">🔊</button>
+    <button class="fav ${favs.has(w.id) ? 'on' : ''}" title="お気に入り">★</button>
+  </div>`;
+}
+function renderList() {
+  const q = norm(document.getElementById('searchBox').value.trim());
+  let words = ALL_WORDS;
+  if (currentCat === 'fav') words = words.filter(w => favs.has(w.id));
+  else if (currentCat !== 'all') words = words.filter(w => w.secIdx === +currentCat);
+  words = words.filter(w => matchesSearch(w, q));
+
+  document.getElementById('resultCount').textContent = words.length + '語';
+  const grid = document.getElementById('grid');
+  if (currentCat === 'all' && !q) {
+    let html = '';
+    DATA.forEach((sec, si) => {
+      html += `<div class="sec-head">${sec.title}</div>`;
+      html += sec.words.map((w, wi) => cardHTML(ALL_WORDS.find(x => x.id === si + ':' + wi))).join('');
+    });
+    grid.innerHTML = html;
+  } else {
+    grid.innerHTML = words.map(cardHTML).join('') || '<div class="fc-empty">該当する単語がありません</div>';
+  }
+}
+document.getElementById('grid').addEventListener('click', e => {
+  const card = e.target.closest('.card');
+  if (!card) return;
+  const w = ALL_WORDS.find(x => x.id === card.dataset.id);
+  if (e.target.closest('.fav')) {
+    favs.has(w.id) ? favs.delete(w.id) : favs.add(w.id);
+    e.target.closest('.fav').classList.toggle('on', favs.has(w.id));
+    saveFavs();
+    return;
+  }
+  document.querySelectorAll('.card.playing').forEach(c => c.classList.remove('playing'));
+  card.classList.add('playing');
+  speak(w.en, () => card.classList.remove('playing'));
+});
+const searchBox = document.getElementById('searchBox');
+function doSearch() { renderList(); searchBox.blur(); }
+document.getElementById('searchBtn').onclick = doSearch;
+searchBox.addEventListener('keydown', e => {
+  // IMEの変換確定Enterは無視する（isComposing / keyCode 229）
+  if (e.key === 'Enter' && !e.isComposing && e.keyCode !== 229) doSearch();
+});
+searchBox.addEventListener('input', () => { if (!searchBox.value.trim()) renderList(); }); // ×やバックスペースで空にしたら一覧に戻す
+
+/* ===== カテゴリselect（フラッシュカード/クイズ共用） ===== */
+function fillCatSelect(sel, withFav) {
+  sel.innerHTML = `<option value="all">すべて（${ALL_WORDS.length}語）</option>` +
+    (withFav ? `<option value="fav">★ お気に入り</option>` : '') +
+    DATA.map((s, i) => `<option value="${i}">${s.title}（${s.words.length}語）</option>`).join('');
+}
+function catWords(val) {
+  if (val === 'all') return ALL_WORDS;
+  if (val === 'fav') return ALL_WORDS.filter(w => favs.has(w.id));
+  return ALL_WORDS.filter(w => w.secIdx === +val);
+}
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+/* ===== フラッシュカード ===== */
+const fcCat = document.getElementById('fcCat');
+fillCatSelect(fcCat, true);
+let fcDeck = [], fcIdx = 0, fcFlipped = false;
+function fcBuild(doShuffle) {
+  fcDeck = doShuffle ? shuffle(catWords(fcCat.value)) : [...catWords(fcCat.value)];
+  fcIdx = 0; fcFlipped = false;
+  renderFlash();
+}
+fcCat.onchange = () => fcBuild(false);
+document.getElementById('fcDir').onchange = () => { fcFlipped = false; renderFlash(); };
+document.getElementById('fcShuffle').onclick = () => fcBuild(true);
+function renderFlash() {
+  if (!fcDeck.length) fcDeck = [...catWords(fcCat.value)];
+  const stage = document.getElementById('fcStage');
+  if (!fcDeck.length) { stage.innerHTML = '<div class="fc-empty">この範囲に単語がありません（お気に入りは ★ で追加できます）</div>'; return; }
+  const w = fcDeck[fcIdx];
+  const dir = document.getElementById('fcDir').value;
+  const front = dir === 'en' ? `<div class="big enfont">${w.en}</div>` : `<div class="big jpfront">${w.jp}</div>`;
+  const back = dir === 'en'
+    ? `<div class="answer"><div class="a-main">${w.jp}</div>${w.note ? `<div class="a-note">${w.note}</div>` : ''}</div>`
+    : `<div class="answer"><div class="a-main enfont">${w.en}</div>${w.note ? `<div class="a-note">${w.note}</div>` : ''}</div>`;
+  stage.innerHTML = `
+    <div class="fc-counter">${fcIdx + 1} / ${fcDeck.length}　<span style="color:var(--sub)">${w.secTitle}</span></div>
+    <div class="fc-card" id="fcCard">
+      ${front}
+      ${fcFlipped ? back : '<div class="hint">タップで答えを表示</div>'}
+    </div>
+    <div class="fc-nav">
+      <button class="btn" id="fcPrev" ${fcIdx === 0 ? 'disabled' : ''}>◀ 前へ</button>
+      <button class="btn" id="fcSpeak">🔊 発音</button>
+      <button class="btn primary" id="fcNext" ${fcIdx === fcDeck.length - 1 ? 'disabled' : ''}>次へ ▶</button>
+    </div>`;
+  document.getElementById('fcCard').onclick = () => {
+    fcFlipped = !fcFlipped;
+    renderFlash();
+    if (fcFlipped && dir === 'jp' && document.getElementById('fcAuto').checked) speak(w.en);
+  };
+  document.getElementById('fcSpeak').onclick = e => { e.stopPropagation(); speak(w.en); };
+  document.getElementById('fcPrev').onclick = () => { fcIdx--; fcFlipped = false; renderFlash(); fcAutoSpeak(); };
+  document.getElementById('fcNext').onclick = () => { fcIdx++; fcFlipped = false; renderFlash(); fcAutoSpeak(); };
+}
+function fcAutoSpeak() {
+  if (document.getElementById('fcAuto').checked && document.getElementById('fcDir').value === 'en') speak(fcDeck[fcIdx].en);
+}
+
+/* ===== クイズ ===== */
+const qzCat = document.getElementById('qzCat');
+fillCatSelect(qzCat, false);
+let qz = null;
+document.getElementById('qzStart').onclick = () => {
+  const pool = catWords(qzCat.value);
+  if (pool.length < 4) { document.getElementById('qzStage').innerHTML = '<div class="fc-empty">この範囲は単語が少なすぎます</div>'; return; }
+  const qs = shuffle(pool).slice(0, 10).map(w => {
+    const wrong = shuffle(pool.filter(x => x.jp !== w.jp)).slice(0, 3);
+    return { w, opts: shuffle([w, ...wrong]) };
+  });
+  qz = { qs, i: 0, score: 0, wrongs: [] };
+  renderQuiz();
+};
+function renderQuiz() {
+  const stage = document.getElementById('qzStage');
+  if (qz.i >= qz.qs.length) {
+    stage.innerHTML = `
+      <div class="qz-result">
+        <div class="score">${qz.score}<span> / ${qz.qs.length}</span></div>
+        <p>${qz.score === qz.qs.length ? '全問正解！Perfect! 🎉' : qz.score >= 7 ? 'いい調子！Great job!' : 'もう一回挑戦しよう Keep trying!'}</p>
+        <button class="btn primary" onclick="document.getElementById('qzStart').click()">もう一度</button>
+      </div>
+      ${qz.wrongs.length ? `<div class="qz-review"><h3>間違えた単語</h3>${qz.wrongs.map(w =>
+        `<div class="item"><span class="w enfont">${w.en}</span><span class="m">${w.jp}</span></div>`).join('')}</div>` : ''}`;
+    return;
+  }
+  const q = qz.qs[qz.i];
+  stage.innerHTML = `
+    <div class="qz-progress"><div style="width:${qz.i / qz.qs.length * 100}%"></div></div>
+    <div class="qz-q">
+      <div class="big enfont">${q.w.en}</div>
+      <button class="spk-big" id="qzSpeak">🔊 もう一度聞く</button>
+    </div>
+    <div class="qz-opts" id="qzOpts">
+      ${q.opts.map((o, i) => `<button data-i="${i}">${o.jp}</button>`).join('')}
+    </div>
+    <div class="qz-next" id="qzNext"></div>`;
+  speak(q.w.en);
+  document.getElementById('qzSpeak').onclick = () => speak(q.w.en);
+  document.querySelectorAll('#qzOpts button').forEach(b => b.onclick = () => {
+    const chosen = q.opts[+b.dataset.i];
+    const correct = chosen === q.w;
+    document.querySelectorAll('#qzOpts button').forEach((x, i) => {
+      x.disabled = true;
+      if (q.opts[i] === q.w) x.classList.add('correct');
+      else if (x === b && !correct) x.classList.add('wrong');
+    });
+    if (correct) qz.score++;
+    else qz.wrongs.push(q.w);
+    document.getElementById('qzNext').innerHTML = `<button class="btn primary" id="qzGo">${qz.i === qz.qs.length - 1 ? '結果を見る' : '次の問題 ▶'}</button>`;
+    document.getElementById('qzGo').onclick = () => { qz.i++; renderQuiz(); };
+  });
+}
+
+/* ===== トップに戻る ===== */
+function goTop() {
+  // 長距離のsmoothは遅く、iOSでは触ると中断されるので、遠いときは即ジャンプ
+  if (window.scrollY > 1500) window.scrollTo(0, 0);
+  else window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+// タイトルクリック = ホーム（単語帳の全件一覧の先頭）に戻る
+document.querySelector('header h1').onclick = () => {
+  showView('list');
+  searchBox.value = '';
+  currentCat = 'all';
+  [...chipsEl.children].forEach((x, i) => x.classList.toggle('on', i === 0));
+  renderList();
+  window.scrollTo(0, 0);
+};
+document.getElementById('toTop').onclick = goTop;
+
+/* ===== 起動 ===== */
+buildChips();
+renderList();
+</script>
+</body>
+</html>
