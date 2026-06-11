@@ -104,11 +104,50 @@
   .qz-review .item .w { font-family: 'Inter', sans-serif; font-weight: 700; font-size: 20px; }
   .qz-review .item .m { font-size: 13.5px; color: var(--sub); text-align: right; }
 
+  /* ---- 会話 ---- */
+  .tk-mode { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: #fff; }
+  .tk-mode button { border: none; background: none; padding: 9px 16px; font-size: 13.5px; font-weight: 500; color: var(--sub); }
+  .tk-mode button.on { background: var(--ink); color: #fff; }
+  .tk-wrap { max-width: 680px; margin: 0 auto; }
+  .ph-row { background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; margin-bottom: 10px; position: relative; cursor: pointer; transition: border-color .12s; }
+  .ph-row:active { border-color: var(--red); }
+  .ph-row.playing { border-color: var(--red); box-shadow: 0 0 0 2px var(--red-soft); }
+  .ph-row .en { font-family: 'Inter', sans-serif; font-weight: 700; font-size: 19px; line-height: 1.4; padding-right: 88px; }
+  .ph-row .jp { margin-top: 4px; font-size: 14px; }
+  .ph-row .note { margin-top: 3px; font-size: 12.5px; color: var(--sub); }
+  .ph-row .spk { position: absolute; top: 12px; right: 50px; border: none; background: var(--red-soft); color: var(--red); width: 34px; height: 34px; border-radius: 50%; font-size: 15px; display: flex; align-items: center; justify-content: center; }
+  .ph-row .mic { position: absolute; top: 12px; right: 8px; border: none; background: var(--green-soft); color: var(--green); width: 34px; height: 34px; border-radius: 50%; font-size: 15px; display: flex; align-items: center; justify-content: center; }
+  .ph-row .mic.rec { background: var(--red); color: #fff; animation: pulse 1s infinite; }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .55; } }
+  .mic-result { margin-top: 8px; font-size: 13.5px; font-weight: 700; }
+  .mic-result .said { font-weight: 400; color: var(--sub); }
+  .mic-result.good { color: var(--green); }
+  .mic-result.mid { color: #b8860b; }
+  .mic-result.bad { color: var(--red); }
+  .dlg-roles { display: flex; gap: 8px; align-items: center; margin-bottom: 14px; flex-wrap: wrap; }
+  .dlg-roles .lbl { font-size: 13px; color: var(--sub); }
+  .bubble-row { display: flex; flex-direction: column; align-items: flex-start; margin-bottom: 12px; }
+  .bubble-row.B { align-items: flex-end; }
+  .bubble-row .who { font-size: 11px; color: var(--sub); margin: 0 6px 3px; }
+  .bubble { max-width: 86%; background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 11px 15px; cursor: pointer; }
+  .bubble-row.B .bubble { background: var(--red-soft); border-color: transparent; }
+  .bubble .en { font-weight: 700; font-size: 16.5px; font-family: 'Inter', sans-serif; line-height: 1.45; }
+  .bubble .jp { font-size: 12.5px; color: var(--sub); margin-top: 4px; }
+  .bubble.yours { border: 1.5px dashed var(--red); background: #fff; }
+  .bubble.yours .prompt { font-size: 12px; color: var(--red); font-weight: 700; margin-bottom: 4px; }
+  .dlg-controls { display: flex; gap: 10px; margin: 16px 0; justify-content: center; flex-wrap: wrap; }
+  .dlg-done { text-align: center; color: var(--green); font-weight: 700; padding: 10px 0 4px; }
+
   .banner { background: #fff8e6; border: 1px solid #f0dca8; border-radius: 10px; padding: 12px 16px; font-size: 13px; line-height: 1.7; margin-bottom: 16px; color: #6b5618; }
   #toTop { position: fixed; right: 16px; bottom: calc(72px + env(safe-area-inset-bottom)); width: 46px; height: 46px; border-radius: 50%; border: 1px solid var(--line); background: #fff; color: var(--ink); font-size: 19px; box-shadow: 0 2px 10px rgba(0,0,0,.12); z-index: 49; display: flex; align-items: center; justify-content: center; }
+  .fc-card .big.long { font-size: 26px; }
+  .fc-card .answer .a-main.enfont.long { font-size: 24px; }
+  .qz-q .big.long { font-size: 23px; }
   @media (max-width: 600px) {
     .card .en { font-size: 26px; }
     .fc-card .big { font-size: 36px; }
+    .fc-card .big.long { font-size: 22px; }
+    .qz-q .big.long { font-size: 20px; }
   }
 </style>
 </head>
@@ -164,6 +203,18 @@
     </div>
     <div class="qz-stage" id="qzStage"></div>
   </div>
+
+  <!-- 会話 -->
+  <div id="view-talk" style="display:none">
+    <div class="fc-controls">
+      <select id="tkScene"></select>
+      <span class="tk-mode">
+        <button id="tkModePhrase" class="on">フレーズ</button>
+        <button id="tkModeDialog">会話練習</button>
+      </span>
+    </div>
+    <div class="tk-wrap" id="tkStage"></div>
+  </div>
 </main>
 
 <button id="toTop" title="トップに戻る" aria-label="トップに戻る">↑</button>
@@ -172,11 +223,293 @@
   <button data-view="list" class="on">📖 単語帳</button>
   <button data-view="flash">🃏 フラッシュカード</button>
   <button data-view="quiz">✏️ クイズ</button>
+  <button data-view="talk">💬 会話</button>
 </nav>
 
 <script>
 const DATA = [{"id":"sec1","title":"あいさつ・基本表現","words":[{"en":"hello","jp":"こんにちは"},{"en":"good morning","jp":"おはようございます"},{"en":"thank you","jp":"ありがとう"},{"en":"thank you very much","jp":"どうもありがとう"},{"en":"sorry","jp":"ごめんなさい"},{"en":"excuse me","jp":"すみません","note":"呼びかけ・軽い謝罪"},{"en":"no problem","jp":"大丈夫・問題ない"},{"en":"goodbye","jp":"さようなら"},{"en":"see you again","jp":"また会いましょう"},{"en":"you're welcome","jp":"どういたしまして"},{"en":"congratulations","jp":"おめでとう"},{"en":"good night","jp":"おやすみなさい"},{"en":"please","jp":"お願いします"},{"en":"yes","jp":"はい"},{"en":"yeah","jp":"はい・うん","note":"くだけた言い方"},{"en":"no","jp":"いいえ"},{"en":"OK","jp":"OK・了解"},{"en":"nice to meet you","jp":"お会いできてうれしいです"},{"en":"good luck","jp":"がんばって・幸運を"},{"en":"wait a moment","jp":"ちょっと待って"},{"en":"let's go","jp":"行こう"},{"en":"maybe","jp":"たぶん"},{"en":"certainly","jp":"もちろん・確実に"},{"en":"of course","jp":"もちろん"},{"en":"that's right","jp":"そのとおり"},{"en":"go ahead","jp":"どうぞ"},{"en":"I don't understand","jp":"わかりません"},{"en":"say it again","jp":"もう一度言ってください"}]},{"id":"sec2","title":"人称代名詞・指示詞","words":[{"en":"I","jp":"私","note":"常に大文字で書く"},{"en":"you","jp":"あなた・あなたたち"},{"en":"he","jp":"彼"},{"en":"she","jp":"彼女"},{"en":"it","jp":"それ","note":"物・動物・天気などを指す"},{"en":"we","jp":"私たち"},{"en":"they","jp":"彼ら・彼女ら・それら"},{"en":"everyone","jp":"みなさん・全員"},{"en":"someone","jp":"誰か"},{"en":"something","jp":"何か"},{"en":"this","jp":"これ・この"},{"en":"that","jp":"あれ・それ・あの"},{"en":"these","jp":"これら"},{"en":"those","jp":"あれら・それら"},{"en":"here","jp":"ここ"},{"en":"there","jp":"そこ・あそこ"},{"en":"over there","jp":"あそこ・向こう"},{"en":"mine","jp":"私のもの"},{"en":"yours","jp":"あなたのもの"},{"en":"people","jp":"人々"}]},{"id":"sec3","title":"疑問詞","words":[{"en":"what","jp":"何"},{"en":"who","jp":"誰"},{"en":"where","jp":"どこ"},{"en":"which","jp":"どれ・どの"},{"en":"when","jp":"いつ"},{"en":"why","jp":"なぜ"},{"en":"how","jp":"どのように・どう"},{"en":"how much","jp":"いくら","note":"値段・数えられない量"},{"en":"how many","jp":"いくつ","note":"数えられる物の数"},{"en":"how long","jp":"どのくらいの期間"},{"en":"how far","jp":"どのくらいの距離"},{"en":"whose","jp":"誰の"},{"en":"how old","jp":"何歳"}]},{"id":"sec4","title":"数字・数え方","words":[{"en":"one","jp":"1"},{"en":"two","jp":"2"},{"en":"three","jp":"3"},{"en":"four","jp":"4"},{"en":"five","jp":"5"},{"en":"six","jp":"6"},{"en":"seven","jp":"7"},{"en":"eight","jp":"8"},{"en":"nine","jp":"9"},{"en":"ten","jp":"10"},{"en":"eleven","jp":"11"},{"en":"twelve","jp":"12"},{"en":"fifteen","jp":"15"},{"en":"twenty","jp":"20"},{"en":"twenty-one","jp":"21"},{"en":"thirty","jp":"30"},{"en":"fifty","jp":"50"},{"en":"one hundred","jp":"100"},{"en":"one thousand","jp":"1,000"},{"en":"ten thousand","jp":"10,000","note":"英語では「10×1000」と表す"},{"en":"one hundred thousand","jp":"100,000"},{"en":"one million","jp":"100万"},{"en":"one billion","jp":"10億"},{"en":"number","jp":"数・番号"},{"en":"time(s)","jp":"回","note":"three times＝3回"},{"en":"half","jp":"半分"},{"en":"first","jp":"第1の・1番目"}]},{"id":"sec5","title":"時間","words":[{"en":"time","jp":"時間"},{"en":"hour","jp":"時間（単位）","note":"60分のこと"},{"en":"minute","jp":"分"},{"en":"second","jp":"秒","note":"「第2の」の意味もある"},{"en":"day","jp":"日"},{"en":"week","jp":"週"},{"en":"month","jp":"月"},{"en":"year","jp":"年"},{"en":"today","jp":"今日"},{"en":"tomorrow","jp":"明日"},{"en":"yesterday","jp":"昨日"},{"en":"the day before yesterday","jp":"一昨日"},{"en":"the day after tomorrow","jp":"明後日"},{"en":"morning","jp":"朝・午前"},{"en":"noon","jp":"昼・正午"},{"en":"afternoon","jp":"午後"},{"en":"evening","jp":"夕方・晩"},{"en":"night","jp":"夜"},{"en":"now","jp":"今"},{"en":"o'clock","jp":"〜時","note":"ちょうどの時刻に使う"},{"en":"last week","jp":"先週"},{"en":"this week","jp":"今週"},{"en":"next week","jp":"来週"},{"en":"last month","jp":"先月"},{"en":"next month","jp":"来月"},{"en":"last year","jp":"去年"},{"en":"this year","jp":"今年"},{"en":"next year","jp":"来年"},{"en":"weekend","jp":"週末"},{"en":"holiday","jp":"祝日・休日"},{"en":"birthday","jp":"誕生日"},{"en":"New Year's Day","jp":"元日・正月"},{"en":"past","jp":"過去"},{"en":"future","jp":"未来"},{"en":"early","jp":"早い・早く"},{"en":"late","jp":"遅い・遅れた"}]},{"id":"sec6","title":"曜日・月","words":[{"en":"Monday","jp":"月曜日"},{"en":"Tuesday","jp":"火曜日"},{"en":"Wednesday","jp":"水曜日"},{"en":"Thursday","jp":"木曜日"},{"en":"Friday","jp":"金曜日"},{"en":"Saturday","jp":"土曜日"},{"en":"Sunday","jp":"日曜日"},{"en":"January","jp":"1月"},{"en":"February","jp":"2月"},{"en":"March","jp":"3月"},{"en":"April","jp":"4月"},{"en":"May","jp":"5月"},{"en":"June","jp":"6月"},{"en":"July","jp":"7月"},{"en":"August","jp":"8月"},{"en":"September","jp":"9月"},{"en":"October","jp":"10月"},{"en":"November","jp":"11月"},{"en":"December","jp":"12月"}]},{"id":"sec7","title":"家族","words":[{"en":"family","jp":"家族"},{"en":"father","jp":"父"},{"en":"mother","jp":"母"},{"en":"parents","jp":"両親"},{"en":"child","jp":"子ども"},{"en":"son","jp":"息子"},{"en":"daughter","jp":"娘"},{"en":"older brother","jp":"兄"},{"en":"older sister","jp":"姉"},{"en":"younger brother","jp":"弟"},{"en":"younger sister","jp":"妹"},{"en":"grandfather","jp":"祖父"},{"en":"grandmother","jp":"祖母"},{"en":"grandchild","jp":"孫"},{"en":"husband","jp":"夫"},{"en":"wife","jp":"妻"},{"en":"uncle","jp":"おじ"},{"en":"aunt","jp":"おば"},{"en":"relatives","jp":"親戚"},{"en":"siblings","jp":"兄弟姉妹"}]},{"id":"sec8","title":"体","words":[{"en":"body","jp":"体"},{"en":"head","jp":"頭"},{"en":"hair","jp":"髪"},{"en":"face","jp":"顔"},{"en":"eye","jp":"目"},{"en":"nose","jp":"鼻"},{"en":"mouth","jp":"口"},{"en":"ear","jp":"耳"},{"en":"tooth","jp":"歯","note":"複数形はteeth"},{"en":"tongue","jp":"舌"},{"en":"neck","jp":"首"},{"en":"shoulder","jp":"肩"},{"en":"hand","jp":"手"},{"en":"finger","jp":"指"},{"en":"leg","jp":"足・脚"},{"en":"stomach","jp":"おなか・胃"},{"en":"back","jp":"背中"},{"en":"chest","jp":"胸"},{"en":"heart","jp":"心臓・心"},{"en":"skin","jp":"皮膚・肌"},{"en":"blood","jp":"血"},{"en":"bone","jp":"骨"},{"en":"brain","jp":"脳"},{"en":"voice","jp":"声"}]},{"id":"sec9","title":"食べ物・料理","words":[{"en":"food","jp":"食べ物・料理"},{"en":"rice","jp":"ご飯・米"},{"en":"bread","jp":"パン"},{"en":"noodles","jp":"麺"},{"en":"sandwich","jp":"サンドイッチ"},{"en":"pizza","jp":"ピザ"},{"en":"hamburger","jp":"ハンバーガー"},{"en":"meat","jp":"肉"},{"en":"beef","jp":"牛肉"},{"en":"chicken","jp":"鶏肉・鶏"},{"en":"pork","jp":"豚肉"},{"en":"fish","jp":"魚"},{"en":"shrimp","jp":"エビ"},{"en":"crab","jp":"カニ"},{"en":"squid","jp":"イカ"},{"en":"egg","jp":"卵"},{"en":"vegetables","jp":"野菜"},{"en":"tofu","jp":"豆腐"},{"en":"salt","jp":"塩"},{"en":"sugar","jp":"砂糖"},{"en":"soy sauce","jp":"しょうゆ"},{"en":"chili","jp":"唐辛子"},{"en":"garlic","jp":"にんにく"},{"en":"onion","jp":"玉ねぎ"},{"en":"ginger","jp":"しょうが"},{"en":"cooking oil","jp":"食用油"},{"en":"butter","jp":"バター"},{"en":"cheese","jp":"チーズ"},{"en":"salad","jp":"サラダ"},{"en":"dessert","jp":"デザート"},{"en":"cake","jp":"ケーキ"},{"en":"candy","jp":"あめ・キャンディー"},{"en":"ice cream","jp":"アイスクリーム"},{"en":"soup","jp":"スープ"},{"en":"fried rice","jp":"チャーハン"},{"en":"steak","jp":"ステーキ"},{"en":"breakfast","jp":"朝食"},{"en":"lunch","jp":"昼食"},{"en":"dinner","jp":"夕食"},{"en":"chopsticks","jp":"箸"},{"en":"bowl","jp":"茶碗・椀"},{"en":"plate","jp":"皿"},{"en":"spoon","jp":"スプーン"}]},{"id":"sec10","title":"飲み物","words":[{"en":"drink","jp":"飲み物","note":"「飲む」の意味もある"},{"en":"water","jp":"水"},{"en":"tea","jp":"お茶・紅茶"},{"en":"green tea","jp":"緑茶"},{"en":"coffee","jp":"コーヒー"},{"en":"iced coffee","jp":"アイスコーヒー"},{"en":"milk","jp":"牛乳"},{"en":"orange juice","jp":"オレンジジュース"},{"en":"smoothie","jp":"スムージー"},{"en":"soda","jp":"炭酸飲料"},{"en":"beer","jp":"ビール"},{"en":"wine","jp":"ワイン"},{"en":"alcohol","jp":"酒・アルコール"},{"en":"ice","jp":"氷"}]},{"id":"sec11","title":"果物","words":[{"en":"fruit","jp":"果物"},{"en":"banana","jp":"バナナ"},{"en":"mango","jp":"マンゴー"},{"en":"orange","jp":"オレンジ","note":"「オレンジ色」の意味もある"},{"en":"apple","jp":"りんご"},{"en":"grape","jp":"ぶどう"},{"en":"watermelon","jp":"すいか"},{"en":"pineapple","jp":"パイナップル"},{"en":"papaya","jp":"パパイヤ"},{"en":"peach","jp":"桃"},{"en":"pear","jp":"梨"},{"en":"cherry","jp":"さくらんぼ"},{"en":"melon","jp":"メロン"},{"en":"kiwi","jp":"キウイ"},{"en":"lychee","jp":"ライチ"},{"en":"coconut","jp":"ココナッツ"},{"en":"lemon","jp":"レモン"},{"en":"grapefruit","jp":"グレープフルーツ"},{"en":"blueberry","jp":"ブルーベリー"},{"en":"plum","jp":"すもも・プラム"},{"en":"strawberry","jp":"いちご"}]},{"id":"sec12","title":"野菜","words":[{"en":"tomato","jp":"トマト"},{"en":"potato","jp":"じゃがいも"},{"en":"carrot","jp":"にんじん"},{"en":"cabbage","jp":"キャベツ"},{"en":"spinach","jp":"ほうれん草"},{"en":"cucumber","jp":"きゅうり"},{"en":"mushroom","jp":"きのこ"},{"en":"corn","jp":"とうもろこし"},{"en":"beans","jp":"豆"},{"en":"broccoli","jp":"ブロッコリー"},{"en":"lettuce","jp":"レタス"},{"en":"pumpkin","jp":"かぼちゃ"},{"en":"eggplant","jp":"なす"},{"en":"sweet potato","jp":"さつまいも"},{"en":"green pepper","jp":"ピーマン"}]},{"id":"sec13","title":"動物","words":[{"en":"animal","jp":"動物"},{"en":"dog","jp":"犬"},{"en":"cat","jp":"猫"},{"en":"chicken","jp":"鶏","note":"「鶏肉」の意味もある"},{"en":"duck","jp":"アヒル・カモ"},{"en":"pig","jp":"豚"},{"en":"cow","jp":"牛"},{"en":"lion","jp":"ライオン"},{"en":"wolf","jp":"おおかみ"},{"en":"bird","jp":"鳥"},{"en":"elephant","jp":"象"},{"en":"tiger","jp":"虎"},{"en":"monkey","jp":"猿"},{"en":"snake","jp":"蛇"},{"en":"mouse","jp":"ねずみ","note":"複数形はmice"},{"en":"goat","jp":"ヤギ"},{"en":"horse","jp":"馬"},{"en":"sheep","jp":"羊","note":"複数形もsheep"},{"en":"bear","jp":"熊"},{"en":"crocodile","jp":"ワニ"},{"en":"mosquito","jp":"蚊"},{"en":"bee","jp":"蜂"},{"en":"butterfly","jp":"蝶"},{"en":"rabbit","jp":"うさぎ"},{"en":"frog","jp":"カエル"}]},{"id":"sec14","title":"色","words":[{"en":"color","jp":"色"},{"en":"red","jp":"赤"},{"en":"blue","jp":"青"},{"en":"green","jp":"緑"},{"en":"yellow","jp":"黄色"},{"en":"white","jp":"白"},{"en":"black","jp":"黒"},{"en":"pink","jp":"ピンク"},{"en":"purple","jp":"紫"},{"en":"brown","jp":"茶色"},{"en":"gray","jp":"灰色","note":"英国つづりはgrey"},{"en":"orange","jp":"オレンジ色"}]},{"id":"sec15","title":"天気・自然","words":[{"en":"weather","jp":"天気"},{"en":"sky","jp":"空"},{"en":"rain","jp":"雨"},{"en":"sunny","jp":"晴れた"},{"en":"wind","jp":"風"},{"en":"cloud","jp":"雲"},{"en":"storm","jp":"嵐・台風"},{"en":"thunder","jp":"雷"},{"en":"snow","jp":"雪"},{"en":"sun","jp":"太陽"},{"en":"moon","jp":"月"},{"en":"star","jp":"星"},{"en":"sea","jp":"海"},{"en":"river","jp":"川"},{"en":"mountain","jp":"山"},{"en":"forest","jp":"森"},{"en":"lake","jp":"湖"},{"en":"island","jp":"島"},{"en":"tree","jp":"木"},{"en":"flower","jp":"花"},{"en":"leaf","jp":"葉","note":"複数形はleaves"},{"en":"ground","jp":"地面・土地"},{"en":"sand","jp":"砂"},{"en":"season","jp":"季節"},{"en":"spring","jp":"春"},{"en":"summer","jp":"夏"},{"en":"autumn","jp":"秋","note":"米語ではfall"},{"en":"winter","jp":"冬"},{"en":"rainy season","jp":"雨季・梅雨"},{"en":"dry season","jp":"乾季"}]},{"id":"sec16","title":"家・家具・家電","words":[{"en":"room","jp":"部屋"},{"en":"bedroom","jp":"寝室"},{"en":"living room","jp":"リビング"},{"en":"kitchen","jp":"台所"},{"en":"toilet","jp":"トイレ","note":"米語ではrestroom／bathroomが一般的"},{"en":"bathroom","jp":"浴室"},{"en":"door","jp":"ドア"},{"en":"window","jp":"窓"},{"en":"bed","jp":"ベッド"},{"en":"closet","jp":"戸棚・クローゼット"},{"en":"refrigerator","jp":"冷蔵庫","note":"口語ではfridge"},{"en":"fan","jp":"扇風機"},{"en":"air conditioner","jp":"エアコン"},{"en":"TV","jp":"テレビ"},{"en":"lamp","jp":"電灯・ランプ"},{"en":"mirror","jp":"鏡"},{"en":"key","jp":"鍵"},{"en":"elevator","jp":"エレベーター","note":"英国ではlift"},{"en":"stairs","jp":"階段"},{"en":"wall","jp":"壁"},{"en":"floor","jp":"床・階"},{"en":"roof","jp":"屋根"},{"en":"blanket","jp":"掛け布団・毛布"},{"en":"pillow","jp":"枕"},{"en":"washing machine","jp":"洗濯機"},{"en":"microwave","jp":"電子レンジ"},{"en":"trash","jp":"ごみ","note":"英国ではrubbish"}]},{"id":"sec17","title":"衣服・身につける物","words":[{"en":"clothes","jp":"服"},{"en":"shirt","jp":"シャツ"},{"en":"T-shirt","jp":"Tシャツ"},{"en":"jacket","jp":"上着・ジャケット"},{"en":"coat","jp":"コート"},{"en":"pants","jp":"ズボン","note":"英国ではtrousers"},{"en":"skirt","jp":"スカート"},{"en":"dress","jp":"ワンピース・ドレス"},{"en":"shoes","jp":"靴"},{"en":"sandals","jp":"サンダル"},{"en":"socks","jp":"靴下"},{"en":"hat","jp":"帽子"},{"en":"bag","jp":"かばん・袋"},{"en":"glasses","jp":"眼鏡"},{"en":"watch","jp":"腕時計","note":"「見る」の意味もある"},{"en":"suit","jp":"スーツ"},{"en":"belt","jp":"ベルト"},{"en":"ring","jp":"指輪"},{"en":"scarf","jp":"マフラー・スカーフ"},{"en":"umbrella","jp":"傘"}]},{"id":"sec18","title":"乗り物・交通","words":[{"en":"vehicle","jp":"乗り物・車両"},{"en":"motorbike","jp":"バイク"},{"en":"bicycle","jp":"自転車","note":"口語ではbike"},{"en":"car","jp":"自動車"},{"en":"bus","jp":"バス"},{"en":"train","jp":"列車・電車"},{"en":"subway","jp":"地下鉄","note":"英国ではunderground"},{"en":"airplane","jp":"飛行機","note":"planeと略せる"},{"en":"ship","jp":"船"},{"en":"taxi","jp":"タクシー"},{"en":"station","jp":"駅"},{"en":"airport","jp":"空港"},{"en":"bus stop","jp":"バス停"},{"en":"road","jp":"道・道路"},{"en":"street","jp":"通り・街路"},{"en":"bridge","jp":"橋"},{"en":"intersection","jp":"交差点"},{"en":"traffic light","jp":"信号"},{"en":"map","jp":"地図"},{"en":"ticket","jp":"切符・チケット"},{"en":"traffic","jp":"交通"},{"en":"traffic jam","jp":"渋滞"},{"en":"crosswalk","jp":"横断歩道"}]},{"id":"sec19","title":"場所・建物","words":[{"en":"market","jp":"市場"},{"en":"supermarket","jp":"スーパー"},{"en":"store","jp":"店","note":"英国ではshop"},{"en":"restaurant","jp":"レストラン"},{"en":"café","jp":"カフェ"},{"en":"convenience store","jp":"コンビニ"},{"en":"hospital","jp":"病院"},{"en":"pharmacy","jp":"薬局"},{"en":"bank","jp":"銀行"},{"en":"post office","jp":"郵便局"},{"en":"park","jp":"公園"},{"en":"library","jp":"図書館"},{"en":"museum","jp":"博物館・美術館"},{"en":"temple","jp":"寺"},{"en":"church","jp":"教会"},{"en":"hotel","jp":"ホテル"},{"en":"movie theater","jp":"映画館","note":"英国ではcinema"},{"en":"stadium","jp":"スタジアム"},{"en":"police station","jp":"警察署"},{"en":"university","jp":"大学"},{"en":"office","jp":"オフィス・事務所"},{"en":"factory","jp":"工場"},{"en":"swimming pool","jp":"プール"},{"en":"shopping mall","jp":"ショッピングモール"},{"en":"city","jp":"都市・市"},{"en":"countryside","jp":"田舎・農村"},{"en":"capital","jp":"首都"},{"en":"hometown","jp":"故郷"}]},{"id":"sec20","title":"職業","words":[{"en":"job","jp":"職業・仕事"},{"en":"teacher","jp":"教師"},{"en":"student","jp":"生徒・学生"},{"en":"university student","jp":"大学生"},{"en":"doctor","jp":"医者"},{"en":"nurse","jp":"看護師"},{"en":"engineer","jp":"エンジニア"},{"en":"farmer","jp":"農民"},{"en":"worker","jp":"労働者・工員"},{"en":"office worker","jp":"会社員"},{"en":"boss","jp":"上司・社長"},{"en":"lawyer","jp":"弁護士"},{"en":"police officer","jp":"警察官"},{"en":"chef","jp":"料理人・シェフ"},{"en":"driver","jp":"運転手"},{"en":"singer","jp":"歌手"},{"en":"actor","jp":"俳優"},{"en":"journalist","jp":"記者・ジャーナリスト"},{"en":"salesperson","jp":"販売員"},{"en":"tour guide","jp":"（観光）ガイド"},{"en":"interpreter","jp":"通訳"}]},{"id":"sec21","title":"学校・勉強","words":[{"en":"classroom","jp":"教室"},{"en":"lesson","jp":"課・レッスン"},{"en":"homework","jp":"宿題"},{"en":"word","jp":"単語"},{"en":"vocabulary","jp":"語彙"},{"en":"sentence","jp":"文"},{"en":"letter","jp":"文字","note":"「手紙」の意味もある"},{"en":"meaning","jp":"意味"},{"en":"question","jp":"質問"},{"en":"answer","jp":"答え","note":"「答える」の意味もある"},{"en":"exam","jp":"試験"},{"en":"score","jp":"点数"},{"en":"notebook","jp":"ノート"},{"en":"blackboard","jp":"黒板"},{"en":"dictionary","jp":"辞書"},{"en":"grammar","jp":"文法"},{"en":"pronunciation","jp":"発音"},{"en":"spelling","jp":"つづり・スペル"},{"en":"example","jp":"例"},{"en":"page","jp":"ページ"},{"en":"pencil","jp":"鉛筆"},{"en":"ruler","jp":"定規"},{"en":"eraser","jp":"消しゴム","note":"英国ではrubber"},{"en":"knowledge","jp":"知識"},{"en":"vacation","jp":"休暇・休み"}]},{"id":"sec22","title":"仕事・ビジネス","words":[{"en":"work","jp":"仕事","note":"「働く」の意味もある"},{"en":"meeting","jp":"会議"},{"en":"customer","jp":"顧客"},{"en":"contract","jp":"契約"},{"en":"salary","jp":"給料"},{"en":"report","jp":"報告・レポート"},{"en":"plan","jp":"計画"},{"en":"project","jp":"プロジェクト"},{"en":"market","jp":"市場（マーケット）"},{"en":"product","jp":"製品・商品"},{"en":"service","jp":"サービス"},{"en":"price","jp":"価格"},{"en":"sales","jp":"売上"},{"en":"profit","jp":"利益"},{"en":"tax","jp":"税金"},{"en":"export","jp":"輸出"},{"en":"import","jp":"輸入"},{"en":"advertising","jp":"広告"},{"en":"partner","jp":"パートナー・取引先"},{"en":"colleague","jp":"同僚"},{"en":"business","jp":"ビジネス・経営"},{"en":"company","jp":"会社"},{"en":"e-commerce","jp":"Eコマース・EC"},{"en":"business card","jp":"名刺"},{"en":"deadline","jp":"締め切り"}]},{"id":"sec23","title":"買い物・お金","words":[{"en":"shopping","jp":"買い物"},{"en":"money","jp":"お金"},{"en":"cash","jp":"現金"},{"en":"credit card","jp":"クレジットカード"},{"en":"discount","jp":"値引き・割引"},{"en":"free","jp":"無料","note":"「暇な・自由な」の意味もある"},{"en":"receipt","jp":"領収書・レシート"},{"en":"exchange money","jp":"両替する"},{"en":"dollar","jp":"ドル"},{"en":"yen","jp":"円"},{"en":"euro","jp":"ユーロ"},{"en":"pay","jp":"支払う"},{"en":"bargain","jp":"値切る・お買い得品"},{"en":"quality","jp":"品質"},{"en":"goods","jp":"商品・品物"},{"en":"brand","jp":"ブランド"},{"en":"too expensive","jp":"高すぎる"},{"en":"on sale","jp":"セール中"},{"en":"change","jp":"おつり","note":"「変わる・変える」の意味もある"},{"en":"plastic bag","jp":"ビニール袋"}]},{"id":"sec24","title":"動詞（基本）","words":[{"en":"be","jp":"〜である・いる","note":"am／is／areと変化する"},{"en":"have","jp":"持っている・ある"},{"en":"go","jp":"行く"},{"en":"come","jp":"来る"},{"en":"return","jp":"帰る・戻る"},{"en":"eat","jp":"食べる"},{"en":"drink","jp":"飲む"},{"en":"sleep","jp":"寝る"},{"en":"wake up","jp":"起きる"},{"en":"sit","jp":"座る"},{"en":"stand","jp":"立つ"},{"en":"run","jp":"走る"},{"en":"walk","jp":"歩く"},{"en":"fly","jp":"飛ぶ"},{"en":"swim","jp":"泳ぐ"},{"en":"speak","jp":"話す"},{"en":"listen","jp":"聞く"},{"en":"read","jp":"読む"},{"en":"write","jp":"書く"},{"en":"watch","jp":"見る","note":"テレビ・映画など動くものを見る"},{"en":"look","jp":"見る・目を向ける"},{"en":"see","jp":"見える・会う"},{"en":"study","jp":"勉強する"},{"en":"teach","jp":"教える"},{"en":"do","jp":"する"},{"en":"make","jp":"作る"},{"en":"buy","jp":"買う"},{"en":"sell","jp":"売る"},{"en":"give","jp":"あげる・与える"},{"en":"receive","jp":"受け取る"},{"en":"take","jp":"取る・持っていく"},{"en":"pass","jp":"渡す・合格する"},{"en":"send","jp":"送る"},{"en":"look for","jp":"探す"},{"en":"open","jp":"開ける"},{"en":"close","jp":"閉める"},{"en":"ask","jp":"尋ねる・頼む"},{"en":"answer","jp":"答える"},{"en":"help","jp":"手伝う・助ける"},{"en":"wait","jp":"待つ"},{"en":"begin","jp":"始める・始まる","note":"startも同じ意味"},{"en":"finish","jp":"終わる・終える"},{"en":"stop","jp":"止まる・止める"},{"en":"know","jp":"知っている"},{"en":"understand","jp":"理解する"},{"en":"remember","jp":"覚えている・思い出す"},{"en":"forget","jp":"忘れる"},{"en":"think","jp":"考える・思う"},{"en":"believe","jp":"信じる"},{"en":"need","jp":"必要とする"},{"en":"want","jp":"〜したい・欲しい"},{"en":"must","jp":"〜しなければならない","note":"have toも同じ意味"},{"en":"can","jp":"〜できる"},{"en":"like","jp":"好む・好きである"},{"en":"love","jp":"愛する・大好きである"},{"en":"hate","jp":"嫌う"},{"en":"meet","jp":"会う"},{"en":"laugh","jp":"笑う"},{"en":"cry","jp":"泣く"},{"en":"live","jp":"住む・生きる"},{"en":"die","jp":"死ぬ"}]},{"id":"sec25","title":"動詞（生活・行動）","words":[{"en":"cook","jp":"料理する"},{"en":"wash","jp":"洗う"},{"en":"wash the dishes","jp":"食器を洗う"},{"en":"do the laundry","jp":"洗濯する"},{"en":"clean","jp":"掃除する・片付ける"},{"en":"wipe","jp":"拭く"},{"en":"sweep","jp":"（床を）掃く"},{"en":"take a bath","jp":"入浴する","note":"シャワーはtake a shower"},{"en":"brush one's teeth","jp":"歯を磨く"},{"en":"put on","jp":"着る・身につける"},{"en":"take off","jp":"脱ぐ","note":"「離陸する」の意味もある"},{"en":"wear","jp":"着ている・身につけている"},{"en":"rest","jp":"休む"},{"en":"play","jp":"遊ぶ・（スポーツを）する・演奏する"},{"en":"sing","jp":"歌う"},{"en":"dance","jp":"踊る"},{"en":"draw","jp":"描く"},{"en":"take a photo","jp":"写真を撮る"},{"en":"travel","jp":"旅行する"},{"en":"drive","jp":"運転する"},{"en":"park","jp":"駐車する","note":"「公園」の意味もある"},{"en":"be born","jp":"生まれる"},{"en":"get married","jp":"結婚する"},{"en":"feel","jp":"感じる"},{"en":"become","jp":"〜になる"},{"en":"change","jp":"変わる・変える"},{"en":"use","jp":"使う"},{"en":"work","jp":"働く"},{"en":"practice","jp":"練習する"},{"en":"join","jp":"参加する"},{"en":"introduce","jp":"紹介する"},{"en":"explain","jp":"説明する"},{"en":"agree","jp":"同意する"},{"en":"refuse","jp":"断る"},{"en":"promise","jp":"約束する"},{"en":"call","jp":"電話をかける・呼ぶ"},{"en":"send a message","jp":"メッセージを送る"},{"en":"translate","jp":"翻訳する"},{"en":"prepare","jp":"準備する"},{"en":"decide","jp":"決める"},{"en":"choose","jp":"選ぶ"},{"en":"try","jp":"試す・努力する"},{"en":"borrow","jp":"借りる"},{"en":"give back","jp":"返す"},{"en":"lose","jp":"失う・なくす・負ける"},{"en":"win","jp":"勝つ"},{"en":"order","jp":"注文する"},{"en":"reserve","jp":"予約する","note":"bookも同じ意味"},{"en":"cancel","jp":"キャンセルする"},{"en":"check","jp":"チェックする・確認する"}]},{"id":"sec26","title":"形容詞（性質・状態）","words":[{"en":"beautiful","jp":"美しい・きれいな"},{"en":"good","jp":"良い"},{"en":"bad","jp":"悪い"},{"en":"big","jp":"大きい"},{"en":"small","jp":"小さい"},{"en":"tall","jp":"（背が）高い"},{"en":"high","jp":"高い"},{"en":"low","jp":"低い"},{"en":"long","jp":"長い"},{"en":"short","jp":"短い・（背が）低い"},{"en":"wide","jp":"広い"},{"en":"narrow","jp":"狭い"},{"en":"heavy","jp":"重い"},{"en":"light","jp":"軽い","note":"「明るい・光」の意味もある"},{"en":"thick","jp":"厚い"},{"en":"thin","jp":"薄い・やせた"},{"en":"fast","jp":"速い"},{"en":"slow","jp":"遅い"},{"en":"hot","jp":"暑い・熱い・辛い"},{"en":"cold","jp":"寒い・冷たい","note":"「風邪」の意味もある"},{"en":"cool","jp":"涼しい・かっこいい"},{"en":"warm","jp":"暖かい"},{"en":"new","jp":"新しい"},{"en":"old","jp":"古い・年取った"},{"en":"clean","jp":"清潔な","note":"「掃除する」の意味もある"},{"en":"dirty","jp":"汚い"},{"en":"bright","jp":"明るい"},{"en":"dark","jp":"暗い"},{"en":"strong","jp":"強い"},{"en":"weak","jp":"弱い"},{"en":"rich","jp":"裕福な"},{"en":"poor","jp":"貧しい"},{"en":"young","jp":"若い"},{"en":"fat","jp":"太った"},{"en":"right","jp":"正しい","note":"「右」の意味もある"},{"en":"wrong","jp":"間違った"},{"en":"true","jp":"本当の"},{"en":"same","jp":"同じ"},{"en":"different","jp":"違う・別の"},{"en":"far","jp":"遠い"},{"en":"near","jp":"近い"},{"en":"crowded","jp":"混んでいる"},{"en":"empty","jp":"空の・すいている"},{"en":"safe","jp":"安全な"},{"en":"dangerous","jp":"危険な"},{"en":"convenient","jp":"便利な"},{"en":"important","jp":"重要な"},{"en":"necessary","jp":"必要な"},{"en":"famous","jp":"有名な"},{"en":"special","jp":"特別な"},{"en":"difficult","jp":"難しい"},{"en":"easy","jp":"易しい・簡単な"},{"en":"expensive","jp":"（値段が）高い"},{"en":"cheap","jp":"（値段が）安い"},{"en":"deep","jp":"深い"}]},{"id":"sec27","title":"形容詞（味・感情・人柄）","words":[{"en":"delicious","jp":"おいしい"},{"en":"sweet","jp":"甘い"},{"en":"sour","jp":"酸っぱい"},{"en":"spicy","jp":"辛い"},{"en":"salty","jp":"塩辛い・しょっぱい"},{"en":"bitter","jp":"苦い"},{"en":"bland","jp":"味が薄い"},{"en":"fun","jp":"楽しい"},{"en":"sad","jp":"悲しい"},{"en":"angry","jp":"怒った"},{"en":"scared","jp":"怖い・おびえた"},{"en":"worried","jp":"心配な"},{"en":"happy","jp":"幸せな・うれしい"},{"en":"interesting","jp":"面白い・興味深い"},{"en":"boring","jp":"つまらない・退屈な"},{"en":"tired","jp":"疲れた"},{"en":"healthy","jp":"元気な・健康な"},{"en":"sick","jp":"病気の","note":"英国ではillが一般的"},{"en":"hungry","jp":"空腹の"},{"en":"full","jp":"満腹の・いっぱいの"},{"en":"thirsty","jp":"のどが渇いた"},{"en":"sleepy","jp":"眠い"},{"en":"smart","jp":"賢い"},{"en":"hardworking","jp":"勤勉な"},{"en":"lazy","jp":"怠惰な"},{"en":"polite","jp":"礼儀正しい"},{"en":"friendly","jp":"親しみやすい"},{"en":"kind","jp":"親切な","note":"「種類」の意味もある"},{"en":"cute","jp":"かわいい"},{"en":"quiet","jp":"静かな"},{"en":"noisy","jp":"うるさい"},{"en":"busy","jp":"忙しい"},{"en":"free","jp":"暇な・自由な"},{"en":"funny","jp":"ユーモアのある・おかしい"},{"en":"comfortable","jp":"快適な"}]},{"id":"sec28","title":"副詞・程度・頻度","words":[{"en":"very","jp":"とても"},{"en":"so","jp":"とても・そんなに"},{"en":"too","jp":"〜すぎる","note":"「〜も」の意味もある"},{"en":"a little","jp":"少し"},{"en":"slightly","jp":"やや・わずかに"},{"en":"also","jp":"〜も・また"},{"en":"still","jp":"まだ・依然として"},{"en":"already","jp":"もう・すでに"},{"en":"yet","jp":"まだ（〜ない）","note":"否定文・疑問文で使う"},{"en":"will","jp":"〜するだろう","note":"未来を表す"},{"en":"just","jp":"ちょうど・〜したばかり"},{"en":"always","jp":"いつも"},{"en":"usually","jp":"普段・たいてい"},{"en":"often","jp":"よく・しばしば"},{"en":"sometimes","jp":"時々"},{"en":"rarely","jp":"めったに〜ない"},{"en":"never","jp":"決して〜ない"},{"en":"soon","jp":"すぐに"},{"en":"before","jp":"前に"},{"en":"after","jp":"後で"},{"en":"together","jp":"一緒に"},{"en":"only","jp":"〜だけ"},{"en":"around","jp":"約・およそ","note":"「周りに」の意味もある"},{"en":"more","jp":"もっと・さらに"},{"en":"again","jp":"再び・また"},{"en":"almost","jp":"ほとんど"}]},{"id":"sec29","title":"接続詞・前置詞","words":[{"en":"and","jp":"〜と・そして"},{"en":"but","jp":"しかし"},{"en":"or","jp":"または"},{"en":"because","jp":"なぜなら・〜なので"},{"en":"so","jp":"だから"},{"en":"if","jp":"もし"},{"en":"when","jp":"〜のとき","note":"「いつ」の意味もある"},{"en":"to","jp":"〜するために・〜へ"},{"en":"of","jp":"〜の"},{"en":"with","jp":"〜と一緒に"},{"en":"for","jp":"〜のために・〜に"},{"en":"from","jp":"〜から"},{"en":"until","jp":"〜まで"},{"en":"in","jp":"〜の中に"},{"en":"on","jp":"〜の上に"},{"en":"under","jp":"〜の下に"},{"en":"outside","jp":"〜の外に"},{"en":"between","jp":"〜の間に"},{"en":"about","jp":"〜について"},{"en":"by","jp":"〜で（手段）・〜のそばに"},{"en":"according to","jp":"〜によると・〜に従って"}]},{"id":"sec30","title":"国・国籍・言語","words":[{"en":"Japan","jp":"日本"},{"en":"America","jp":"アメリカ","note":"the U.S.／the USAともいう"},{"en":"the UK","jp":"イギリス"},{"en":"South Korea","jp":"韓国"},{"en":"China","jp":"中国"},{"en":"France","jp":"フランス"},{"en":"Germany","jp":"ドイツ"},{"en":"Russia","jp":"ロシア"},{"en":"Australia","jp":"オーストラリア"},{"en":"India","jp":"インド"},{"en":"Thailand","jp":"タイ"},{"en":"Vietnam","jp":"ベトナム"},{"en":"Canada","jp":"カナダ"},{"en":"Brazil","jp":"ブラジル"},{"en":"Mexico","jp":"メキシコ"},{"en":"Indonesia","jp":"インドネシア"},{"en":"Malaysia","jp":"マレーシア"},{"en":"Singapore","jp":"シンガポール"},{"en":"the Philippines","jp":"フィリピン"},{"en":"Taiwan","jp":"台湾"},{"en":"Spain","jp":"スペイン"},{"en":"Italy","jp":"イタリア"},{"en":"English","jp":"英語"},{"en":"Japanese","jp":"日本語","note":"「日本人」の意味もある"},{"en":"Chinese","jp":"中国語"},{"en":"Korean","jp":"韓国語"},{"en":"Spanish","jp":"スペイン語"},{"en":"Japanese people","jp":"日本人"},{"en":"American people","jp":"アメリカ人"},{"en":"foreigner","jp":"外国人"},{"en":"world","jp":"世界"},{"en":"Asia","jp":"アジア"},{"en":"Europe","jp":"ヨーロッパ"},{"en":"international","jp":"国際的な"}]},{"id":"sec31","title":"旅行","words":[{"en":"trip","jp":"旅行","note":"travelも同じ意味"},{"en":"passport","jp":"パスポート"},{"en":"visa","jp":"ビザ"},{"en":"luggage","jp":"荷物"},{"en":"suitcase","jp":"スーツケース"},{"en":"book a room","jp":"部屋を予約する"},{"en":"check-in","jp":"チェックイン"},{"en":"check-out","jp":"チェックアウト"},{"en":"tourist","jp":"観光客"},{"en":"tourist spot","jp":"観光地・名所"},{"en":"flight","jp":"フライト・便"},{"en":"plane ticket","jp":"航空券"},{"en":"customs","jp":"税関","note":"「習慣」の意味もある"},{"en":"embassy","jp":"大使館"},{"en":"beach","jp":"ビーチ・浜辺"},{"en":"souvenir","jp":"お土産"},{"en":"guide","jp":"案内・ガイドする"},{"en":"schedule","jp":"スケジュール・日程"},{"en":"single room","jp":"シングルルーム"},{"en":"double room","jp":"ダブルルーム"}]},{"id":"sec32","title":"健康・病気","words":[{"en":"health","jp":"健康"},{"en":"illness","jp":"病気"},{"en":"medicine","jp":"薬"},{"en":"hurt","jp":"痛い・痛む"},{"en":"fever","jp":"熱・発熱"},{"en":"cough","jp":"咳"},{"en":"cold","jp":"風邪","note":"catch a cold＝風邪をひく"},{"en":"flu","jp":"インフルエンザ"},{"en":"headache","jp":"頭痛"},{"en":"stomachache","jp":"腹痛"},{"en":"toothache","jp":"歯痛"},{"en":"see a doctor","jp":"診察を受ける"},{"en":"injection","jp":"注射"},{"en":"allergy","jp":"アレルギー"},{"en":"fatigue","jp":"疲労・だるさ"},{"en":"sleep well","jp":"よく眠る"},{"en":"exercise","jp":"運動する・運動"},{"en":"lose weight","jp":"減量する・やせる"},{"en":"gain weight","jp":"体重が増える"},{"en":"insurance","jp":"保険"},{"en":"emergency","jp":"救急・緊急"},{"en":"injury","jp":"けが・傷"}]},{"id":"sec33","title":"趣味・スポーツ","words":[{"en":"hobby","jp":"趣味"},{"en":"sports","jp":"スポーツ"},{"en":"soccer","jp":"サッカー","note":"英国ではfootball"},{"en":"baseball","jp":"野球"},{"en":"basketball","jp":"バスケットボール"},{"en":"volleyball","jp":"バレーボール"},{"en":"table tennis","jp":"卓球"},{"en":"badminton","jp":"バドミントン"},{"en":"tennis","jp":"テニス"},{"en":"swimming","jp":"水泳"},{"en":"jogging","jp":"ジョギング"},{"en":"going to the gym","jp":"ジムで鍛えること"},{"en":"music","jp":"音楽"},{"en":"movie","jp":"映画","note":"英国ではfilm"},{"en":"reading","jp":"読書"},{"en":"fishing","jp":"釣り"},{"en":"chess","jp":"チェス"},{"en":"video game","jp":"テレビゲーム"},{"en":"guitar","jp":"ギター"},{"en":"photography","jp":"写真撮影"},{"en":"hiking","jp":"ハイキング・登山"},{"en":"yoga","jp":"ヨガ"},{"en":"dancing","jp":"ダンス"},{"en":"camping","jp":"キャンプ"},{"en":"team","jp":"チーム"},{"en":"player","jp":"選手"},{"en":"match","jp":"試合","note":"米語ではgameが一般的"}]},{"id":"sec34","title":"IT・スマホ","words":[{"en":"computer","jp":"パソコン・コンピュータ"},{"en":"smartphone","jp":"スマートフォン"},{"en":"network","jp":"ネットワーク"},{"en":"internet","jp":"インターネット"},{"en":"email","jp":"メール"},{"en":"message","jp":"メッセージ"},{"en":"social media","jp":"SNS","note":"英語でSNSとは言わない"},{"en":"app","jp":"アプリ"},{"en":"website","jp":"ウェブサイト"},{"en":"password","jp":"パスワード"},{"en":"download","jp":"ダウンロードする"},{"en":"Wi-Fi","jp":"Wi-Fi"},{"en":"camera","jp":"カメラ"},{"en":"screen","jp":"画面・モニター"},{"en":"keyboard","jp":"キーボード"},{"en":"data","jp":"データ"},{"en":"AI","jp":"人工知能・AI","note":"artificial intelligenceの略"},{"en":"charge","jp":"充電する","note":"「料金」の意味もある"}]},{"id":"sec35","title":"数量の表現（a piece of など）","words":[{"en":"a piece of","jp":"1切れの・1枚の","note":"a piece of paper＝紙1枚"},{"en":"a pair of","jp":"一対の・1組の","note":"a pair of shoes＝靴1足"},{"en":"a cup of","jp":"カップ1杯の","note":"a cup of coffee＝コーヒー1杯"},{"en":"a glass of","jp":"グラス1杯の","note":"a glass of water＝水1杯"},{"en":"a bottle of","jp":"瓶1本の"},{"en":"a box of","jp":"1箱の"},{"en":"a sheet of","jp":"（紙など）1枚の"},{"en":"a slice of","jp":"（薄い）1切れの","note":"a slice of bread＝パン1枚"},{"en":"a loaf of","jp":"（パン）1斤の"},{"en":"a bowl of","jp":"茶碗・ボウル1杯の"},{"en":"a bunch of","jp":"1房・1束の","note":"a bunch of bananas＝バナナ1房"},{"en":"a set of","jp":"1セットの・一式の"},{"en":"a kind of","jp":"一種の"},{"en":"a couple of","jp":"2〜3の"},{"en":"a lot of","jp":"たくさんの"},{"en":"a few","jp":"少しの","note":"数えられる物に使う"},{"en":"a little","jp":"少しの","note":"数えられない物に使う"},{"en":"a dozen","jp":"1ダース・12個の"}]},{"id":"sec36","title":"方向・位置","words":[{"en":"left side","jp":"左側"},{"en":"right side","jp":"右側"},{"en":"front","jp":"前方・前"},{"en":"back","jp":"後方・後ろ","note":"「背中」の意味もある"},{"en":"next to","jp":"〜のとなりに"},{"en":"across from","jp":"〜の向かい側に"},{"en":"inside","jp":"内側・中に"},{"en":"outside","jp":"外側・外に"},{"en":"in the middle","jp":"真ん中に"},{"en":"around","jp":"周りに"},{"en":"north","jp":"北"},{"en":"south","jp":"南"},{"en":"east","jp":"東"},{"en":"west","jp":"西"},{"en":"direction","jp":"方向"},{"en":"turn left","jp":"左に曲がる"},{"en":"turn right","jp":"右に曲がる"},{"en":"go straight","jp":"まっすぐ行く"},{"en":"turn back","jp":"引き返す・戻る"},{"en":"entrance","jp":"入口"},{"en":"exit","jp":"出口"},{"en":"address","jp":"住所"}]},{"id":"sec37","title":"日常の名詞いろいろ","words":[{"en":"newspaper","jp":"新聞"},{"en":"letter","jp":"手紙"},{"en":"photo","jp":"写真"},{"en":"event","jp":"出来事・イベント"},{"en":"news","jp":"ニュース"},{"en":"problem","jp":"問題"},{"en":"reason","jp":"理由"},{"en":"way","jp":"方法・やり方","note":"「道」の意味もある"},{"en":"thing","jp":"物・こと"},{"en":"matter","jp":"事柄・問題"},{"en":"present","jp":"プレゼント・贈り物","note":"giftも同じ意味"},{"en":"paper","jp":"紙"},{"en":"name","jp":"名前"},{"en":"age","jp":"年齢"},{"en":"dream","jp":"夢"},{"en":"life","jp":"生活・人生"},{"en":"habit","jp":"習慣"},{"en":"experience","jp":"経験"},{"en":"chance","jp":"チャンス・機会"},{"en":"result","jp":"結果"},{"en":"truth","jp":"事実・真実"},{"en":"opinion","jp":"意見"},{"en":"advice","jp":"アドバイス・助言"},{"en":"personality","jp":"性格"},{"en":"smile","jp":"笑顔・ほほえむ"},{"en":"noise","jp":"騒音"},{"en":"smell","jp":"におい"},{"en":"taste","jp":"味"},{"en":"sound","jp":"音"},{"en":"light","jp":"光"},{"en":"shadow","jp":"影"},{"en":"ball","jp":"ボール"},{"en":"fire","jp":"火"},{"en":"smoke","jp":"煙"},{"en":"air","jp":"空気"},{"en":"environment","jp":"環境"},{"en":"society","jp":"社会"},{"en":"culture","jp":"文化"},{"en":"history","jp":"歴史"},{"en":"tradition","jp":"伝統"},{"en":"law","jp":"法律"},{"en":"government","jp":"政府"},{"en":"peace","jp":"平和"},{"en":"war","jp":"戦争"},{"en":"love","jp":"愛・恋愛"},{"en":"friendship","jp":"友情"},{"en":"joy","jp":"喜び"},{"en":"sadness","jp":"悲しみ"},{"en":"difference","jp":"違い"},{"en":"wallet","jp":"財布"},{"en":"meal","jp":"食事"},{"en":"story","jp":"物語・話"},{"en":"song","jp":"歌"},{"en":"shower","jp":"にわか雨・シャワー"},{"en":"gift","jp":"贈り物・ギフト"}]}];
 const AUDIO_MAP = {};
+
+/* ===== 日常会話データ ===== */
+const PHRASES = [
+{id:"ph1",title:"自己紹介・初対面",phrases:[
+{en:"Nice to meet you.",jp:"はじめまして。"},
+{en:"My name is Ken.",jp:"私の名前はケンです。"},
+{en:"I'm from Japan.",jp:"日本から来ました。"},
+{en:"What's your name?",jp:"お名前は何ですか？"},
+{en:"Where are you from?",jp:"出身はどちらですか？"},
+{en:"What do you do?",jp:"お仕事は何をされていますか？"},
+{en:"I work for an IT company.",jp:"IT企業で働いています。"},
+{en:"This is my friend, Emi.",jp:"こちらは友達のエミです。"},
+{en:"I've heard a lot about you.",jp:"お噂はかねがね伺っています。"},
+{en:"Nice meeting you.",jp:"お会いできてよかったです。",note:"別れ際に使う"},
+{en:"Let's keep in touch.",jp:"連絡を取り合いましょう。"},
+{en:"How do you two know each other?",jp:"お二人はどういう知り合いですか？"}
+],dialog:[
+{s:"A",en:"Hi, I'm Ken. Nice to meet you.",jp:"こんにちは、ケンです。はじめまして。"},
+{s:"B",en:"Nice to meet you too. I'm Sarah.",jp:"こちらこそはじめまして。サラです。"},
+{s:"A",en:"Where are you from, Sarah?",jp:"サラさんはどちらの出身ですか？"},
+{s:"B",en:"I'm from Canada. How about you?",jp:"カナダ出身です。あなたは？"},
+{s:"A",en:"I'm from Japan. I work for an IT company.",jp:"日本です。IT企業で働いています。"},
+{s:"B",en:"That's interesting!",jp:"それは面白いですね！"}
+]},
+{id:"ph2",title:"日常のあいさつ・近況",phrases:[
+{en:"How are you?",jp:"元気ですか？"},
+{en:"I'm good, thanks. And you?",jp:"元気です、ありがとう。あなたは？"},
+{en:"How's it going?",jp:"調子はどう？",note:"くだけた言い方"},
+{en:"Not bad.",jp:"悪くないよ。"},
+{en:"What's up?",jp:"やあ・どうしてる？",note:"とてもくだけた言い方"},
+{en:"Long time no see!",jp:"久しぶり！"},
+{en:"How have you been?",jp:"（しばらくぶりに）元気にしてた？"},
+{en:"I've been busy lately.",jp:"最近忙しくて。"},
+{en:"How was your weekend?",jp:"週末はどうだった？"},
+{en:"It was great.",jp:"とても良かったよ。"},
+{en:"Same as usual.",jp:"いつも通りだよ。"},
+{en:"Have a nice day!",jp:"よい一日を！"}
+],dialog:[
+{s:"A",en:"Hi Tom! Long time no see!",jp:"やあトム！久しぶり！"},
+{s:"B",en:"Hey! How have you been?",jp:"おお！元気にしてた？"},
+{s:"A",en:"Pretty good. How about you?",jp:"元気だよ。君は？"},
+{s:"B",en:"I've been busy with work lately.",jp:"最近仕事が忙しくてね。"},
+{s:"A",en:"Take it easy.",jp:"無理しないでね。"},
+{s:"B",en:"Thanks. See you around!",jp:"ありがとう。またね！"}
+]},
+{id:"ph3",title:"お願い・依頼・許可",phrases:[
+{en:"Can you help me?",jp:"手伝ってもらえますか？"},
+{en:"Could you do me a favor?",jp:"お願いがあるのですが。"},
+{en:"Sure, no problem.",jp:"もちろん、いいですよ。"},
+{en:"Sorry, I can't right now.",jp:"ごめんなさい、今はできません。"},
+{en:"Can I use your phone?",jp:"電話を借りてもいいですか？"},
+{en:"Of course.",jp:"もちろんです。"},
+{en:"Could you wait a moment?",jp:"少し待っていただけますか？"},
+{en:"Can I ask you something?",jp:"ちょっと聞いてもいいですか？"},
+{en:"Would you mind opening the window?",jp:"窓を開けていただけませんか？",note:"Would you mind 〜ing＝丁寧な依頼"},
+{en:"Not at all.",jp:"（mindに対して）いいですよ。"},
+{en:"Thank you so much.",jp:"本当にありがとうございます。"},
+{en:"No worries.",jp:"気にしないで。"}
+],dialog:[
+{s:"A",en:"Could you do me a favor?",jp:"お願いがあるんだけど。"},
+{s:"B",en:"Sure. What is it?",jp:"いいよ。何？"},
+{s:"A",en:"Can you help me move this desk?",jp:"この机を動かすのを手伝ってくれない？"},
+{s:"B",en:"No problem. Where do you want it?",jp:"いいよ。どこに置きたいの？"},
+{s:"A",en:"Over there, by the window.",jp:"あそこの窓のそばに。"},
+{s:"B",en:"OK, let's do it.",jp:"よし、やろう。"}
+]},
+{id:"ph4",title:"買い物",phrases:[
+{en:"I'm just looking, thanks.",jp:"見ているだけです、ありがとう。"},
+{en:"How much is this?",jp:"これはいくらですか？"},
+{en:"Do you have this in a different size?",jp:"これの違うサイズはありますか？"},
+{en:"Can I try it on?",jp:"試着してもいいですか？"},
+{en:"It's too expensive.",jp:"高すぎます。"},
+{en:"Do you have anything cheaper?",jp:"もっと安いものはありますか？"},
+{en:"I'll take it.",jp:"これをください。"},
+{en:"Can I pay by card?",jp:"カードで払えますか？"},
+{en:"Can I get a receipt?",jp:"レシートをもらえますか？"},
+{en:"Could you wrap it as a gift?",jp:"プレゼント用に包んでもらえますか？"},
+{en:"Where is the fitting room?",jp:"試着室はどこですか？"},
+{en:"That's all, thanks.",jp:"以上です、ありがとう。"}
+],dialog:[
+{s:"A",en:"Hi, can I help you?",jp:"いらっしゃいませ、何かお探しですか？"},
+{s:"B",en:"Yes, how much is this T-shirt?",jp:"はい、このTシャツはいくらですか？"},
+{s:"A",en:"It's twenty dollars.",jp:"20ドルです。"},
+{s:"B",en:"Can I try it on?",jp:"試着してもいいですか？"},
+{s:"A",en:"Of course. The fitting room is over there.",jp:"もちろんです。試着室はあちらです。"},
+{s:"B",en:"Thanks. I'll take it.",jp:"ありがとう。これください。"}
+]},
+{id:"ph5",title:"レストラン・カフェ",phrases:[
+{en:"A table for two, please.",jp:"2人席をお願いします。"},
+{en:"Can I see the menu?",jp:"メニューを見せてもらえますか？"},
+{en:"What do you recommend?",jp:"おすすめは何ですか？"},
+{en:"I'll have this one.",jp:"これにします。"},
+{en:"Can I get a coffee to go?",jp:"コーヒーをテイクアウトでお願いします。",note:"to go＝持ち帰りで"},
+{en:"Is this spicy?",jp:"これは辛いですか？"},
+{en:"I'm allergic to eggs.",jp:"卵アレルギーがあります。"},
+{en:"Excuse me, can we order?",jp:"すみません、注文いいですか？"},
+{en:"It's delicious!",jp:"おいしいです！"},
+{en:"Check, please.",jp:"お会計をお願いします。"},
+{en:"Can we split the bill?",jp:"割り勘にできますか？"},
+{en:"That's it for now.",jp:"とりあえず以上です。"}
+],dialog:[
+{s:"A",en:"Are you ready to order?",jp:"ご注文はお決まりですか？"},
+{s:"B",en:"Yes. What do you recommend?",jp:"はい。おすすめは何ですか？"},
+{s:"A",en:"The grilled chicken is very popular.",jp:"グリルチキンが人気です。"},
+{s:"B",en:"OK, I'll have that.",jp:"では、それにします。"},
+{s:"A",en:"Anything to drink?",jp:"お飲み物はいかがですか？"},
+{s:"B",en:"Just water, please.",jp:"水だけお願いします。"}
+]},
+{id:"ph6",title:"道案内・移動",phrases:[
+{en:"Excuse me, where is the station?",jp:"すみません、駅はどこですか？"},
+{en:"How do I get to the airport?",jp:"空港へはどう行けばいいですか？"},
+{en:"Is it far from here?",jp:"ここから遠いですか？"},
+{en:"It's about a ten-minute walk.",jp:"歩いて10分くらいです。"},
+{en:"Go straight and turn left.",jp:"まっすぐ行って左に曲がってください。"},
+{en:"It's on your right.",jp:"右側にあります。"},
+{en:"I'm lost.",jp:"道に迷いました。"},
+{en:"Can you show me on the map?",jp:"地図で教えてもらえますか？"},
+{en:"Which line should I take?",jp:"どの路線に乗ればいいですか？"},
+{en:"Where should I get off?",jp:"どこで降りればいいですか？"},
+{en:"Does this bus go to the museum?",jp:"このバスは博物館へ行きますか？"},
+{en:"Thank you for your help.",jp:"助けてくれてありがとうございます。"}
+],dialog:[
+{s:"A",en:"Excuse me, where is the nearest station?",jp:"すみません、一番近い駅はどこですか？"},
+{s:"B",en:"Go straight and turn right at the bank.",jp:"まっすぐ行って銀行のところで右に曲がってください。"},
+{s:"A",en:"Is it far from here?",jp:"ここから遠いですか？"},
+{s:"B",en:"No, it's about a five-minute walk.",jp:"いいえ、歩いて5分くらいです。"},
+{s:"A",en:"Thank you so much!",jp:"本当にありがとうございます！"},
+{s:"B",en:"You're welcome.",jp:"どういたしまして。"}
+]},
+{id:"ph7",title:"電話・約束",phrases:[
+{en:"Hello, this is Ken speaking.",jp:"もしもし、ケンです。"},
+{en:"May I speak to Ms. Brown?",jp:"ブラウンさんをお願いできますか？"},
+{en:"Who's calling, please?",jp:"どちら様ですか？"},
+{en:"Just a moment, please.",jp:"少々お待ちください。"},
+{en:"She's not here right now.",jp:"彼女は今おりません。"},
+{en:"Can I leave a message?",jp:"伝言をお願いできますか？"},
+{en:"I'll call back later.",jp:"後でかけ直します。"},
+{en:"Are you free tomorrow?",jp:"明日空いてる？"},
+{en:"How about three o'clock?",jp:"3時はどうですか？"},
+{en:"That works for me.",jp:"それで大丈夫です。"},
+{en:"Sorry, I have plans.",jp:"ごめん、予定があるんだ。"},
+{en:"See you then!",jp:"じゃあその時に！"}
+],dialog:[
+{s:"A",en:"Hello, this is Ken. Is this Sarah?",jp:"もしもし、ケンです。サラさん？"},
+{s:"B",en:"Hi Ken! What's up?",jp:"こんにちはケン！どうしたの？"},
+{s:"A",en:"Are you free this Saturday?",jp:"今週の土曜日、空いてる？"},
+{s:"B",en:"Yes, I think so. Why?",jp:"うん、空いてると思うよ。どうして？"},
+{s:"A",en:"Let's have lunch together. How about noon?",jp:"一緒にランチしようよ。12時はどう？"},
+{s:"B",en:"That works for me. See you then!",jp:"それで大丈夫。じゃあその時に！"}
+]},
+{id:"ph8",title:"雑談（天気・趣味）",phrases:[
+{en:"It's a beautiful day, isn't it?",jp:"いい天気ですね。"},
+{en:"It looks like rain.",jp:"雨が降りそうですね。"},
+{en:"It's getting cold.",jp:"寒くなってきましたね。"},
+{en:"What do you do in your free time?",jp:"暇な時は何をしていますか？"},
+{en:"I'm into cooking these days.",jp:"最近料理にはまっています。",note:"be into 〜＝〜にはまっている"},
+{en:"Do you like sports?",jp:"スポーツは好きですか？"},
+{en:"I'm a big fan of soccer.",jp:"サッカーの大ファンです。"},
+{en:"Have you seen that movie?",jp:"あの映画見た？"},
+{en:"Not yet. Is it good?",jp:"まだなんだ。面白い？"},
+{en:"You should watch it.",jp:"見たほうがいいよ。"},
+{en:"Sounds fun!",jp:"楽しそう！"},
+{en:"Me too.",jp:"私も。"}
+],dialog:[
+{s:"A",en:"It's a beautiful day, isn't it?",jp:"いい天気ですね。"},
+{s:"B",en:"Yes! Perfect for a walk.",jp:"ほんとに！散歩にぴったりですね。"},
+{s:"A",en:"Do you have any plans for the weekend?",jp:"週末は何か予定ありますか？"},
+{s:"B",en:"I'm going camping with my family.",jp:"家族とキャンプに行くんです。"},
+{s:"A",en:"That sounds fun!",jp:"楽しそうですね！"},
+{s:"B",en:"I can't wait.",jp:"待ちきれないですよ。"}
+]},
+{id:"ph9",title:"旅行・ホテル",phrases:[
+{en:"I have a reservation.",jp:"予約しています。"},
+{en:"I'd like to check in.",jp:"チェックインをお願いします。"},
+{en:"What time is checkout?",jp:"チェックアウトは何時ですか？"},
+{en:"Is breakfast included?",jp:"朝食は含まれていますか？"},
+{en:"Could I have the Wi-Fi password?",jp:"Wi-Fiのパスワードを教えてもらえますか？"},
+{en:"The air conditioner doesn't work.",jp:"エアコンが動きません。"},
+{en:"Can I leave my luggage here?",jp:"荷物を預かってもらえますか？"},
+{en:"I'd like a room with a nice view.",jp:"眺めのいい部屋がいいのですが。"},
+{en:"Where can I exchange money?",jp:"どこで両替できますか？"},
+{en:"Can you call a taxi for me?",jp:"タクシーを呼んでもらえますか？"},
+{en:"I'm here on vacation.",jp:"観光で来ています。"},
+{en:"I'm staying for three nights.",jp:"3泊する予定です。"}
+],dialog:[
+{s:"A",en:"Good evening. I have a reservation. My name is Tanaka.",jp:"こんばんは。予約している田中です。"},
+{s:"B",en:"Welcome, Mr. Tanaka. You're staying for three nights, right?",jp:"ようこそ田中様。3泊のご予約ですね？"},
+{s:"A",en:"That's right. Is breakfast included?",jp:"そうです。朝食は含まれていますか？"},
+{s:"B",en:"Yes, from seven to ten in the lobby.",jp:"はい、7時から10時までロビーでどうぞ。"},
+{s:"A",en:"Great. Could I have the Wi-Fi password?",jp:"よかった。Wi-Fiのパスワードを教えてもらえますか？"},
+{s:"B",en:"Of course. Here you are.",jp:"もちろんです。こちらです。"}
+]},
+{id:"ph10",title:"体調・トラブル",phrases:[
+{en:"I don't feel well.",jp:"気分が良くないです。"},
+{en:"I have a headache.",jp:"頭が痛いです。"},
+{en:"I have a fever.",jp:"熱があります。"},
+{en:"I caught a cold.",jp:"風邪をひきました。"},
+{en:"You should see a doctor.",jp:"医者に診てもらったほうがいいよ。"},
+{en:"Take care of yourself.",jp:"お大事に。"},
+{en:"I feel much better now.",jp:"もうだいぶ良くなりました。"},
+{en:"I lost my wallet.",jp:"財布をなくしました。"},
+{en:"My phone was stolen.",jp:"携帯を盗まれました。"},
+{en:"Please call the police.",jp:"警察を呼んでください。"},
+{en:"Is there a pharmacy near here?",jp:"近くに薬局はありますか？"},
+{en:"Help!",jp:"助けて！"}
+],dialog:[
+{s:"A",en:"You don't look well. Are you OK?",jp:"顔色が悪いよ。大丈夫？"},
+{s:"B",en:"I have a headache and a little fever.",jp:"頭痛がして、少し熱もあるんだ。"},
+{s:"A",en:"You should go home and rest.",jp:"家に帰って休んだほうがいいよ。"},
+{s:"B",en:"Yeah, I think I caught a cold.",jp:"うん、風邪をひいたみたい。"},
+{s:"A",en:"Take care of yourself.",jp:"お大事にね。"},
+{s:"B",en:"Thanks. I will.",jp:"ありがとう。そうするよ。"}
+]},
+{id:"ph11",title:"聞き返し・会話のコツ",phrases:[
+{en:"Pardon?",jp:"もう一度言ってください。",note:"短くて丁寧な聞き返し"},
+{en:"Could you say that again?",jp:"もう一度言っていただけますか？"},
+{en:"Could you speak more slowly?",jp:"もっとゆっくり話していただけますか？"},
+{en:"What does this word mean?",jp:"この単語はどういう意味ですか？"},
+{en:"How do you say this in English?",jp:"これは英語で何と言いますか？"},
+{en:"How do you spell it?",jp:"どうつづりますか？"},
+{en:"I see.",jp:"なるほど。"},
+{en:"Really?",jp:"本当に？"},
+{en:"That makes sense.",jp:"納得です。"},
+{en:"Let me think.",jp:"ちょっと考えさせて。"},
+{en:"What do you mean?",jp:"どういう意味ですか？"},
+{en:"My English is not very good.",jp:"英語があまり得意ではありません。"}
+],dialog:[
+{s:"A",en:"Do you have any siblings?",jp:"きょうだいはいますか？"},
+{s:"B",en:"Pardon? Could you speak more slowly?",jp:"すみません、もう少しゆっくり話してもらえますか？"},
+{s:"A",en:"Sure. Do you have any siblings?",jp:"いいですよ。きょうだいは、いますか？"},
+{s:"B",en:"What does \"siblings\" mean?",jp:"siblingsってどういう意味ですか？"},
+{s:"A",en:"It means brothers and sisters.",jp:"兄弟姉妹という意味です。"},
+{s:"B",en:"I see! I have one sister.",jp:"なるほど！姉が1人います。"}
+]},
+{id:"ph12",title:"気持ち・リアクション",phrases:[
+{en:"That's great!",jp:"それはすごい！"},
+{en:"That's too bad.",jp:"それは残念。"},
+{en:"No way!",jp:"まさか！・うそでしょ！"},
+{en:"Are you serious?",jp:"本気？・マジで？"},
+{en:"I'm so happy for you.",jp:"（相手の良い知らせに）私もうれしいよ。"},
+{en:"Congratulations!",jp:"おめでとう！"},
+{en:"Good luck!",jp:"がんばって！"},
+{en:"Don't worry.",jp:"心配しないで。"},
+{en:"It's not your fault.",jp:"あなたのせいじゃないよ。"},
+{en:"I can't wait!",jp:"待ちきれない！"},
+{en:"That sounds good.",jp:"いいね。"},
+{en:"What a surprise!",jp:"びっくりした！"}
+],dialog:[
+{s:"A",en:"Guess what? I passed the exam!",jp:"聞いて！試験に受かったよ！"},
+{s:"B",en:"No way! That's great!",jp:"うそでしょ！すごいじゃん！"},
+{s:"A",en:"I'm so happy.",jp:"本当にうれしいよ。"},
+{s:"B",en:"Congratulations! You worked so hard.",jp:"おめでとう！あんなに頑張ってたもんね。"},
+{s:"A",en:"Let's celebrate this weekend.",jp:"週末にお祝いしようよ。"},
+{s:"B",en:"That sounds good! I can't wait.",jp:"いいね！楽しみ！"}
+]},
+{id:"ph13",title:"別れ際・お礼・謝罪",phrases:[
+{en:"I have to go now.",jp:"もう行かなくちゃ。"},
+{en:"It was nice talking to you.",jp:"話せてよかったです。"},
+{en:"See you later.",jp:"また後でね。"},
+{en:"See you tomorrow.",jp:"また明日。"},
+{en:"Take care.",jp:"気をつけてね。"},
+{en:"Say hi to your family.",jp:"ご家族によろしく。"},
+{en:"Thank you for everything.",jp:"いろいろありがとうございました。"},
+{en:"I really appreciate it.",jp:"本当に感謝しています。"},
+{en:"I'm sorry I'm late.",jp:"遅れてごめんなさい。"},
+{en:"It's OK.",jp:"大丈夫だよ。"},
+{en:"My pleasure.",jp:"どういたしまして。",note:"丁寧な言い方"},
+{en:"Have a good one!",jp:"よい一日を！",note:"くだけた言い方"}
+],dialog:[
+{s:"A",en:"Oh, it's already nine. I have to go now.",jp:"あ、もう9時だ。行かなくちゃ。"},
+{s:"B",en:"So soon?",jp:"もう？"},
+{s:"A",en:"Yeah, I have an early meeting tomorrow.",jp:"うん、明日朝早く会議があるんだ。"},
+{s:"B",en:"OK. It was nice talking to you.",jp:"そっか。話せて楽しかったよ。"},
+{s:"A",en:"Me too. Say hi to your family!",jp:"私も。ご家族によろしくね！"},
+{s:"B",en:"I will. Take care!",jp:"伝えるね。気をつけて！"}
+]}
+];
+const PHRASE_WORDS = [];
+PHRASES.forEach((sec, si) => sec.phrases.forEach((p, pi) => {
+  PHRASE_WORDS.push({ ...p, id: 'p' + si + ':' + pi, secIdx: si, secTitle: sec.title });
+}));
 
 /* ===== 共通 ===== */
 const ALL_WORDS = [];
@@ -252,9 +585,10 @@ document.getElementById('spdSlow').onclick = e => { rate = 0.6; e.target.classLi
 /* ===== タブ切替 ===== */
 function showView(view) {
   document.querySelectorAll('.tabs button').forEach(x => x.classList.toggle('on', x.dataset.view === view));
-  ['list', 'flash', 'quiz'].forEach(v => document.getElementById('view-' + v).style.display = (v === view) ? '' : 'none');
+  ['list', 'flash', 'quiz', 'talk'].forEach(v => document.getElementById('view-' + v).style.display = (v === view) ? '' : 'none');
   stopSpeak();
   if (view === 'flash') renderFlash();
+  if (view === 'talk') renderTalk();
 }
 document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => showView(b.dataset.view));
 
@@ -333,11 +667,16 @@ searchBox.addEventListener('input', () => { if (!searchBox.value.trim()) renderL
 function fillCatSelect(sel, withFav) {
   sel.innerHTML = `<option value="all">すべて（${ALL_WORDS.length}語）</option>` +
     (withFav ? `<option value="fav">★ お気に入り</option>` : '') +
-    DATA.map((s, i) => `<option value="${i}">${s.title}（${s.words.length}語）</option>`).join('');
+    `<optgroup label="単語">` +
+    DATA.map((s, i) => `<option value="${i}">${s.title}（${s.words.length}語）</option>`).join('') +
+    `</optgroup><optgroup label="会話フレーズ">` +
+    PHRASES.map((s, i) => `<option value="p${i}">💬 ${s.title}（${s.phrases.length}）</option>`).join('') +
+    `</optgroup>`;
 }
 function catWords(val) {
   if (val === 'all') return ALL_WORDS;
   if (val === 'fav') return ALL_WORDS.filter(w => favs.has(w.id));
+  if (val[0] === 'p') return PHRASE_WORDS.filter(w => w.secIdx === +val.slice(1));
   return ALL_WORDS.filter(w => w.secIdx === +val);
 }
 function shuffle(arr) {
@@ -367,10 +706,11 @@ function renderFlash() {
   if (!fcDeck.length) { stage.innerHTML = '<div class="fc-empty">この範囲に単語がありません（お気に入りは ★ で追加できます）</div>'; return; }
   const w = fcDeck[fcIdx];
   const dir = document.getElementById('fcDir').value;
-  const front = dir === 'en' ? `<div class="big enfont">${w.en}</div>` : `<div class="big jpfront">${w.jp}</div>`;
+  const long = w.en.length > 16 ? ' long' : '';
+  const front = dir === 'en' ? `<div class="big enfont${long}">${w.en}</div>` : `<div class="big jpfront">${w.jp}</div>`;
   const back = dir === 'en'
     ? `<div class="answer"><div class="a-main">${w.jp}</div>${w.note ? `<div class="a-note">${w.note}</div>` : ''}</div>`
-    : `<div class="answer"><div class="a-main enfont">${w.en}</div>${w.note ? `<div class="a-note">${w.note}</div>` : ''}</div>`;
+    : `<div class="answer"><div class="a-main enfont${long}">${w.en}</div>${w.note ? `<div class="a-note">${w.note}</div>` : ''}</div>`;
   stage.innerHTML = `
     <div class="fc-counter">${fcIdx + 1} / ${fcDeck.length}　<span style="color:var(--sub)">${w.secTitle}</span></div>
     <div class="fc-card" id="fcCard">
@@ -426,7 +766,7 @@ function renderQuiz() {
   stage.innerHTML = `
     <div class="qz-progress"><div style="width:${qz.i / qz.qs.length * 100}%"></div></div>
     <div class="qz-q">
-      <div class="big enfont">${q.w.en}</div>
+      <div class="big enfont${q.w.en.length > 16 ? ' long' : ''}">${q.w.en}</div>
       <button class="spk-big" id="qzSpeak">🔊 もう一度聞く</button>
     </div>
     <div class="qz-opts" id="qzOpts">
@@ -448,6 +788,166 @@ function renderQuiz() {
     document.getElementById('qzNext').innerHTML = `<button class="btn primary" id="qzGo">${qz.i === qz.qs.length - 1 ? '結果を見る' : '次の問題 ▶'}</button>`;
     document.getElementById('qzGo').onclick = () => { qz.i++; renderQuiz(); };
   });
+}
+
+/* ===== 会話 ===== */
+const SRClass = window.SpeechRecognition || window.webkitSpeechRecognition;
+let recog = null;
+function simScore(said, target) {
+  const tokenize = s => s.toLowerCase().replace(/[^a-z0-9' ]/g, ' ').split(/\s+/).filter(Boolean);
+  const wa = tokenize(said), wb = tokenize(target);
+  if (!wb.length) return 0;
+  let hit = 0; const used = new Set();
+  wb.forEach(w => {
+    const i = wa.findIndex((x, ix) => !used.has(ix) && x === w);
+    if (i >= 0) { hit++; used.add(i); }
+  });
+  return hit / wb.length;
+}
+function startMic(target, btn, out) {
+  if (!SRClass) return;
+  stopSpeak();
+  if (recog) { try { recog.abort(); } catch (e) {} }
+  recog = new SRClass();
+  recog.lang = 'en-US';
+  recog.interimResults = false;
+  recog.maxAlternatives = 5;
+  btn.classList.add('rec');
+  out.textContent = '🎙 聞き取り中… 英語で話してください';
+  out.className = 'mic-result';
+  recog.onresult = e => {
+    const alts = [...e.results[0]].map(a => a.transcript);
+    const best = alts.map(t => ({ t, s: simScore(t, target) })).sort((a, b) => b.s - a.s)[0];
+    const pct = Math.round(best.s * 100);
+    const grade = best.s >= 0.8 ? '◎ すばらしい発音です！' : best.s >= 0.5 ? '○ おしい！もう少し' : '△ もう一度挑戦しよう';
+    out.innerHTML = `${grade}（一致率 ${pct}%）<span class="said">　聞き取り結果:「${best.t}」</span>`;
+    out.className = 'mic-result ' + (best.s >= 0.8 ? 'good' : best.s >= 0.5 ? 'mid' : 'bad');
+  };
+  recog.onerror = e => {
+    out.textContent = e.error === 'not-allowed' ? 'マイクの使用が許可されていません（ブラウザの設定を確認）' : '聞き取れませんでした。もう一度どうぞ';
+    out.className = 'mic-result bad';
+  };
+  recog.onend = () => btn.classList.remove('rec');
+  recog.start();
+}
+
+const tkScene = document.getElementById('tkScene');
+tkScene.innerHTML = PHRASES.map((s, i) => `<option value="${i}">${s.title}（${s.phrases.length}フレーズ）</option>`).join('');
+let tkMode = 'phrase';      // 'phrase' | 'dialog'
+let tkRole = 'watch';       // 'watch' | 'A' | 'B'
+let tkStep = 0;             // 表示済みのセリフ数
+tkScene.onchange = () => { tkStep = 0; renderTalk(); };
+document.getElementById('tkModePhrase').onclick = () => { tkMode = 'phrase'; setTkMode(); };
+document.getElementById('tkModeDialog').onclick = () => { tkMode = 'dialog'; tkStep = 0; setTkMode(); };
+function setTkMode() {
+  document.getElementById('tkModePhrase').classList.toggle('on', tkMode === 'phrase');
+  document.getElementById('tkModeDialog').classList.toggle('on', tkMode === 'dialog');
+  stopSpeak();
+  renderTalk();
+}
+
+function renderTalk() {
+  if (tkMode === 'phrase') renderPhrases();
+  else renderDialog();
+}
+
+function renderPhrases() {
+  const sec = PHRASES[+tkScene.value];
+  const stage = document.getElementById('tkStage');
+  stage.innerHTML = sec.phrases.map((p, i) => `
+    <div class="ph-row" data-i="${i}">
+      <div class="en">${p.en}</div>
+      <div class="jp">${p.jp}</div>
+      ${p.note ? `<div class="note">${p.note}</div>` : ''}
+      <button class="spk" title="発音">🔊</button>
+      ${SRClass ? `<button class="mic" title="発音チャレンジ">🎤</button>` : ''}
+      <div class="mic-result" id="micRes${i}"></div>
+    </div>`).join('');
+  stage.querySelectorAll('.ph-row').forEach(row => {
+    const p = sec.phrases[+row.dataset.i];
+    const play = () => {
+      stage.querySelectorAll('.ph-row.playing').forEach(r => r.classList.remove('playing'));
+      row.classList.add('playing');
+      speak(p.en, () => row.classList.remove('playing'));
+    };
+    row.onclick = play;
+    row.querySelector('.spk').onclick = e => { e.stopPropagation(); play(); };
+    const mic = row.querySelector('.mic');
+    if (mic) mic.onclick = e => {
+      e.stopPropagation();
+      startMic(p.en, mic, row.querySelector('.mic-result'));
+    };
+  });
+}
+
+function renderDialog() {
+  const sec = PHRASES[+tkScene.value];
+  const dlg = sec.dialog;
+  const stage = document.getElementById('tkStage');
+  const finished = tkStep >= dlg.length;
+  let html = `
+    <div class="dlg-roles">
+      <span class="lbl">ロール:</span>
+      <span class="tk-mode">
+        <button data-role="watch" class="${tkRole === 'watch' ? 'on' : ''}">見る・聞く</button>
+        <button data-role="A" class="${tkRole === 'A' ? 'on' : ''}">Aを演じる</button>
+        <button data-role="B" class="${tkRole === 'B' ? 'on' : ''}">Bを演じる</button>
+      </span>
+    </div>`;
+  dlg.slice(0, tkStep).forEach((t, i) => {
+    const isYou = tkRole === t.s;
+    const revealed = !isYou || t.revealed;
+    html += `
+      <div class="bubble-row ${t.s}">
+        <span class="who">${t.s}${isYou ? '（あなた）' : ''}</span>
+        <div class="bubble ${isYou && !revealed ? 'yours' : ''}" data-i="${i}">
+          ${isYou && !revealed
+            ? `<div class="prompt">あなたの番！ 英語で言ってみて → タップで答え</div><div class="jp" style="font-size:14.5px;color:var(--ink)">${t.jp}</div>`
+            : `<div class="en">${t.en}</div><div class="jp">${t.jp}</div>`}
+          ${isYou && revealed && SRClass ? `<div class="mic-result" id="dlgMic${i}"></div>` : ''}
+        </div>
+        ${isYou && revealed && SRClass ? `<button class="btn" style="margin:6px 6px 0" data-mic="${i}">🎤 発音チャレンジ</button>` : ''}
+      </div>`;
+  });
+  if (finished) html += `<div class="dlg-done">🎉 会話おわり！おつかれさま</div>`;
+  html += `
+    <div class="dlg-controls">
+      <button class="btn" id="dlgReset" ${tkStep === 0 ? 'disabled' : ''}>↺ 最初から</button>
+      <button class="btn primary" id="dlgNext" ${finished ? 'disabled' : ''}>${tkStep === 0 ? '▶ 会話を始める' : '次のセリフ ▶'}</button>
+    </div>`;
+  stage.innerHTML = html;
+
+  stage.querySelectorAll('[data-role]').forEach(b => b.onclick = () => {
+    tkRole = b.dataset.role;
+    tkStep = 0;
+    dlg.forEach(t => delete t.revealed);
+    stopSpeak();
+    renderDialog();
+  });
+  stage.querySelectorAll('.bubble').forEach(b => b.onclick = () => {
+    const t = dlg[+b.dataset.i];
+    if (tkRole === t.s && !t.revealed) {
+      t.revealed = true;
+      renderDialog();
+      speak(t.en);
+    } else {
+      speak(t.en);
+    }
+  });
+  stage.querySelectorAll('[data-mic]').forEach(b => b.onclick = () => {
+    const i = +b.dataset.mic;
+    startMic(dlg[i].en, b, document.getElementById('dlgMic' + i));
+  });
+  document.getElementById('dlgReset').onclick = () => { tkStep = 0; dlg.forEach(t => delete t.revealed); stopSpeak(); renderDialog(); };
+  document.getElementById('dlgNext').onclick = () => {
+    tkStep++;
+    const t = dlg[tkStep - 1];
+    renderDialog();
+    // 相手のセリフ（または観戦モード）は自動で読み上げ
+    if (tkRole === 'watch' || t.s !== tkRole) speak(t.en);
+    const rows = document.querySelectorAll('.bubble-row');
+    if (rows.length) rows[rows.length - 1].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  };
 }
 
 /* ===== トップに戻る ===== */
